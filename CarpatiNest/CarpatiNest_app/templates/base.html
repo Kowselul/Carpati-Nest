@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}CarpatiNest - Rezervări Pentru Refugii Montane{% endblock %}
+    </title>
+  <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body class="{% block body_class %}{% endblock %}">
+    <nav id="navbar" class="navbar">
+      {% block navbar %}
+      <div class="navbar-container">
+        <div class="nav-left">
+          <a href="{% url 'CarpatiNest_app:index' %}" class="nav-logo">CarpatiNest</a>          <a href="{% url 'CarpatiNest_app:mountain_selection' %}" class="nav-link">Munți</a>
+        </div>
+        <div class="nav-right">
+          {% if user.is_authenticated %}          <div class="user-dropdown">
+            <button class="user-button">
+              <span class="user-icon">👤</span>
+              {% if user.first_name or user.last_name %}
+                {{ user.first_name }} {{ user.last_name }}
+              {% else %}
+                {{ user.username }}              {% endif %}
+            </button>            <div class="dropdown-content">
+              <a href="{% url 'CarpatiNest_app:account_settings' %}" class="dropdown-item settings-btn">
+                <i class="fas fa-cog"></i>
+                Setări cont
+              </a>
+              <form method="post" action="{% url 'CarpatiNest_app:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">
+                  <i class="fas fa-sign-out-alt"></i>
+                  Deconectare
+                </button>
+              </form>
+            </div>
+          </div>
+          {% else %}
+          <a href="{% url 'CarpatiNest_app:login' %}" class="auth-link">Autentificare</a>
+          <a href="{% url 'CarpatiNest_app:register' %}" class="auth-link">Înregistrare</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endblock navbar %}
+    </nav>
+    <main class="main-content">
+      {% block content %}{% endblock %}
+    </main>
+    {% block extra_js %}{% endblock %}
+    <script src="{% static 'js/main.js' %}"></script>
+  </body>
+</html>

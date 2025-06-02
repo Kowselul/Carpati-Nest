@@ -1,0 +1,289 @@
+/* Refuges page specific styles */
+.refuges-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.mountain-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    padding: 4rem 2rem;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('/static/images/mountain-bg.jpg') center/cover;
+    border-radius: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.mountain-header h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+}
+
+.mountain-info {
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.mountain-description {
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.refuges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 2.5rem;
+    padding: 1rem;
+}
+
+.refuge-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.4s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.refuge-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.refuge-image {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.refuge-card:hover .refuge-image {
+    transform: scale(1.05);
+}
+
+/* Overlay pentru imaginea de refugiu */
+.refuge-image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.refuge-image-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+    pointer-events: none;
+}
+
+.refuge-info {
+    padding: 1.8rem;
+}
+
+.refuge-info h2 {
+    color: #1a202c;
+    font-size: 1.6rem;
+    margin-bottom: 1.2rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.refuge-info p {
+    margin-bottom: 0.8rem;
+    line-height: 1.6;
+}
+
+.altitude,
+.capacity,
+.location {
+    color: #2d3748;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.altitude::before,
+.capacity::before,
+.location::before {
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: #3182ce;
+}
+
+.altitude::before {
+    content: '\f6fc'; /* mountain icon */
+}
+
+.capacity::before {
+    content: '\f183'; /* person icon */
+}
+
+.location::before {
+    content: '\f3c5'; /* map marker icon */
+}
+
+.description {
+    color: #4a5568;
+    margin-top: 1.2rem;
+    font-size: 1rem;
+    line-height: 1.7;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1.2rem;
+}
+
+.back-button-container {
+    text-align: center;
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    background: transparent;
+    color: #2d3748;
+    text-decoration: none;
+    border: 2px solid #2d3748;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-secondary::before {
+    content: '\f060'; /* arrow-left icon */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+}
+
+.btn-secondary:hover {
+    background: #2d3748;
+    color: white;
+    transform: translateX(-5px);
+}
+
+.booking-button {
+    margin-top: 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    background: #2b6cb0;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(43, 108, 176, 0.2);
+}
+
+.btn-primary::before {
+    content: '\f073'; /* calendar icon */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+}
+
+.btn-primary:hover {
+    background: #2c5282;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(43, 108, 176, 0.3);
+}
+
+/* Adăugăm badge pentru disponibilitate */
+.refuge-card::before {
+    content: 'Disponibil';
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(72, 187, 120, 0.9);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    z-index: 1;
+    backdrop-filter: blur(4px);
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+    .refuges-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .mountain-header {
+        padding: 3rem 1rem;
+        margin-bottom: 3rem;
+    }
+
+    .mountain-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .refuge-info h2 {
+        font-size: 1.4rem;
+    }
+}
+
+/* Animație pentru loading cards */
+.refuge-card {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Delay pentru fiecare card */
+.refuge-card:nth-child(1) { animation-delay: 0s; }
+.refuge-card:nth-child(2) { animation-delay: 0.1s; }
+.refuge-card:nth-child(3) { animation-delay: 0.2s; }
+.refuge-card:nth-child(4) { animation-delay: 0.3s; }
+.refuge-card:nth-child(5) { animation-delay: 0.4s; }
+.refuge-card:nth-child(6) { animation-delay: 0.5s; }
+.refuge-card:nth-child(7) { animation-delay: 0.6s; }
+.refuge-card:nth-child(8) { animation-delay: 0.7s; }
+.refuge-card:nth-child(9) { animation-delay: 0.8s; }
+.refuge-card:nth-child(10) { animation-delay: 0.9s; }

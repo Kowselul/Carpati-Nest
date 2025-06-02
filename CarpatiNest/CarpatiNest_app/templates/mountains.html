@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/mountains.css' %}" />
+<link rel="stylesheet" href="{% static 'css/spinner.css' %}" />
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block content %}
+<div class="mountain-selection-container">
+    <div id="loadingSpinner" class="spinner"></div>    <h1>Alege muntele pentru aventura ta</h1>
+    <div class="mountains-grid">
+        {% for mountain in mountains %}        <div class="mountain-card">
+            {% if mountain.image %}
+            <img src="{{ mountain.image.url }}" alt="{{ mountain.name }}" class="mountain-image">
+            {% else %}
+            <div class="mountain-image-placeholder"></div>
+            {% endif %}
+            <div class="mountain-info">
+                <h2>{{ mountain.name }}</h2>
+                <p class="altitude">Altitudine: {{ mountain.altitude }}m</p>
+                <p class="description">{{ mountain.description|truncatewords:30 }}</p>
+                <a href="{% url 'CarpatiNest_app:mountain_refuges' mountain.id %}" class="btn btn-primary">Vezi refugiile</a>
+            </div>
+        </div>
+        {% endfor %}    </div>
+    {% if mountains.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if mountains.has_previous %}
+            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link first">&laquo; Prima</a>
+            <a href="?page={{ mountains.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">&lsaquo; Anterior</a>
+        {% endif %}
+
+        {% for num in mountains.paginator.page_range %}
+            {% if mountains.number == num %}
+                <span class="page-link active">{{ num }}</span>
+            {% elif num > mountains.number|add:'-3' and num < mountains.number|add:'3' %}
+                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if mountains.has_next %}
+            <a href="?page={{ mountains.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link">Următoarea &rsaquo;</a>
+            <a href="?page={{ mountains.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-link last">Ultima &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

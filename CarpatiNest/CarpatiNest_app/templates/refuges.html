@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/refuges.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="refuges-container">
+    <div class="mountain-header">
+        <h1>{{ mountain.name }}</h1>
+        <p class="mountain-info">Altitudine: {{ mountain.altitude }}m</p>
+        <p class="mountain-description">{{ mountain.description }}</p>
+    </div>    <div class="refuges-grid">
+        {% for refuge in refuges %}
+        <div class="refuge-card">
+            <div class="refuge-image-container">
+                {% if refuge.image %}
+                <img src="{{ refuge.image.url }}" alt="{{ refuge.name }}" class="refuge-image">
+                {% else %}
+                <img src="{% static 'images/default-refuge.jpg' %}" alt="{{ refuge.name }}" class="refuge-image">
+                {% endif %}
+            </div>
+            <div class="refuge-info">
+                <h2>{{ refuge.name }}</h2>
+                <p class="altitude">{{ refuge.altitude }}m</p>
+                <p class="capacity">{{ refuge.capacity }} persoane</p>
+                {% if refuge.location %}
+                <p class="location">{{ refuge.location }}</p>
+                {% endif %}
+                <p class="description">{{ refuge.description }}</p>
+                <div class="booking-button">
+                    <a href="{% url 'CarpatiNest_app:booking' refuge.id %}" class="btn btn-primary">
+                        Rezervă acum
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="back-button-container">
+        <a href="{% url 'CarpatiNest_app:mountain_selection' %}" class="btn btn-secondary">
+            Înapoi la lista munților
+        </a>
+    </div>
+</div>
+{% endblock %}

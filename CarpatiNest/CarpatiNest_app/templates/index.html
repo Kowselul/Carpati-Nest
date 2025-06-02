@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body_class %}index-page{% endblock %}
+
+{% block content %}
+
+<section class="hero">  <div class="hero-content">
+    <h1>CarpatiNest</h1>
+    <p>Descoperă și rezervă cele mai frumoase refugii montane din Carpați</p>
+    <div class="hero-buttons">
+      <a href="{% url 'CarpatiNest_app:mountain_selection' %}" class="btn">Vezi munții</a>
+      <a href="#about" class="btn">Despre noi</a>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="features-container">
+    <div class="feature-card">
+      <h3>Rezervare simplă</h3>
+      <p>
+        Proces simplu și rapid de rezervare pentru refugiile montane preferate.
+      </p>
+    </div>
+    <div class="feature-card">
+      <h3>Refugii verificate</h3>
+      <p>
+        Toate refugiile listate sunt verificate și întreținute regulat pentru
+        siguranța ta.
+      </p>
+    </div>
+    <div class="feature-card">
+      <h3>Comunitate montană</h3>
+      <p>
+        Fă parte dintr-o comunitate pasionată de drumeții și aventuri montane.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="about">
+  <div class="about-container">
+    <h2>Despre CarpatiNest</h2>
+    <div class="about-content">
+      <div class="about-text">
+        <p>
+          <strong>CarpatiNest</strong> este platforma ta completă pentru
+          rezervarea refugiilor montane din Carpați. Ne-am propus să facem
+          procesul de rezervare cât mai simplu și sigur pentru toți iubitorii
+          muntelui.
+        </p>
+        <h3>Ce oferim?</h3>
+        <ul>
+          <li>Sistem simplu de rezervare online</li>
+          <li>Informații detaliate despre fiecare refugiu</li>
+          <li>Recenzii și evaluări de la alți montaniarzi</li>
+        </ul>
+      </div>
+      <div class="about-image">
+        <img
+          src="{% static 'images/mountain-refuge.jpg' %}"
+          alt="Refugiu Montan"
+          onerror="this.style.display='none'"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

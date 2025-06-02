@@ -1,0 +1,311 @@
+/* Stiluri pentru secțiunea de Recenzii */
+.reviews-container {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: var(--bg-color);
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.reviews-title {
+    position: relative;
+    color: var(--dark-green);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.reviews-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 80px;
+    height: 3px;
+    background: var(--primary-green);
+    border-radius: 2px;
+}
+
+.reviews-title .fas {
+    color: #ffc107;
+    margin-right: 0.5rem;
+}
+
+.average-rating-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1rem;
+    font-weight: normal;
+    margin-left: auto;
+}
+
+.stars-display {
+    color: #ffc107;
+    display: flex;
+    gap: 0.2rem;
+}
+
+.rating-badge {
+    background: var(--primary-green);
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.reviews-count {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+/* Stiluri pentru formularul de recenzii */
+.review-form-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-left: 4px solid var(--primary-green);
+}
+
+.review-form-container h3 {
+    color: var(--dark-green);
+    margin-bottom: 1.2rem;
+    font-size: 1.2rem;
+}
+
+.review-form-container.editing {
+    border-left-color: #f59e0b;
+}
+
+.review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.rating-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rating-container label {
+    font-weight: 500;
+    color: var(--dark-green);
+}
+
+.star-rating-input .stars {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 0.25rem;
+}
+
+.star-rating-input input {
+    display: none;
+}
+
+.star-rating-input label {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.star-rating-input label:hover,
+.star-rating-input label:hover ~ label,
+.star-rating-input input:checked ~ label {
+    color: #ffc107;
+}
+
+.btn-submit-review {
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+    align-self: flex-start;
+}
+
+.btn-submit-review:hover {
+    background: var(--dark-green);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(45, 106, 79, 0.2);
+}
+
+/* Stiluri pentru lista de recenzii */
+.reviews-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.review-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.review-card.your-review {
+    background: #f7fff9;
+    border-left: 3px solid var(--primary-green);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.reviewer-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.reviewer-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 1.5rem;
+}
+
+.reviewer-name {
+    font-weight: 600;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.you-tag {
+    background: var(--pale-green);
+    color: var(--dark-green);
+    padding: 0.1rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.review-rating {
+    display: flex;
+    gap: 0.2rem;
+    color: #ffc107;
+}
+
+.review-date {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.review-comment {
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+.review-comment p {
+    margin-bottom: 0.75rem;
+}
+
+.no-reviews {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #64748b;
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+
+.no-reviews i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #94a3b8;
+}
+
+.no-reviews p {
+    margin-bottom: 0.5rem;
+}
+
+.scroll-to-reviews {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--pale-green);
+    color: var(--dark-green);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    margin: 1.5rem 0;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.scroll-to-reviews:hover {
+    background: var(--primary-green);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.scroll-to-reviews .fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.scroll-to-reviews:hover .fa-chevron-down {
+    transform: translateY(3px);
+}
+
+/* Responsive design pentru recenzii */
+@media (max-width: 768px) {
+    .reviews-title {
+        font-size: 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .average-rating-display {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .review-form-container {
+        padding: 1.2rem;
+    }
+    
+    .btn-submit-review {
+        width: 100%;
+    }
+}
+
+@media (min-width: 768px) {
+    .reviews-list {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+}
