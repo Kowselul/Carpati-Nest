@@ -1,0 +1,127 @@
+/* Stiluri pentru slideshow - Uniformizarea imaginilor */
+
+/* Container pentru slideshow */
+.slideshow-container {
+    max-width: 100%;
+    position: relative;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Stiluri pentru slide-uri */
+.slide {
+    display: none;
+    width: 100%;
+    position: relative;
+}
+
+/* Stiluri pentru imagini în slides */
+.slide img {
+    width: 100%;
+    height: 400px; /* Înălțime fixă pentru toate imaginile */
+    object-fit: cover; /* Păstrează aspectul imaginii fără a o distorsiona */
+    object-position: center; /* Centrează imaginea */
+    display: block;
+    border-radius: 8px;
+}
+
+/* Pentru containerul fără imagini */
+.no-images {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #f5f7f5;
+    color: #2d6a4f;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.no-images i {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.7;
+}
+
+.no-images p {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.no-images-subtitle {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+/* Stiluri pentru caption */
+.slide-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 12px;
+    text-align: center;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Stiluri pentru navigare */
+.dot-container {
+    text-align: center;
+    padding: 15px 0;
+}
+
+.dot {
+    cursor: pointer;
+    height: 12px;
+    width: 12px;
+    margin: 0 5px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.active, .dot:hover {
+    background-color: #2d6a4f;
+}
+
+/* Butoane Next și Prev */
+.slideshow-controls {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.prev, .next {
+    cursor: pointer;
+    padding: 8px 16px;
+    color: white;
+    background-color: rgba(45, 106, 79, 0.6);
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.3s ease;
+    border-radius: 50%;
+    margin: 0 10px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.prev:hover, .next:hover {
+    background-color: rgba(45, 106, 79, 0.9);
+}
+
+/* Animații pentru fade */
+.fade {
+    animation-name: fade;
+    animation-duration: 1s;
+}
+
+@keyframes fade {
+    from {opacity: .6} 
+    to {opacity: 1}
+}

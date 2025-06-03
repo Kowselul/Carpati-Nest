@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/my_bookings.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="my-bookings-container">
+    <div class="page-header">
+        <h1>Rezervările Mele</h1>
+        <p>Vizualizează și gestionează toate rezervările tale</p>
+    </div>
+
+    <div class="bookings-content">
+        {% if bookings %}
+            <div class="bookings-list">
+                {% for booking in bookings %}
+                    <div class="booking-card">
+                        <div class="refuge-info">
+                            <div class="refuge-image">
+                                {% if booking.refuge.image %}
+                                    <img src="{{ booking.refuge.image.url }}" alt="{{ booking.refuge.name }}">
+                                {% else %}
+                                    <div class="no-image">
+                                        <i class="fas fa-mountain"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="refuge-details">
+                                <h3>{{ booking.refuge.name }}</h3>
+                                <p class="mountain-name">{{ booking.refuge.mountain.name }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="booking-info">
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>{{ booking.booking_date|date:"j F Y" }}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-users"></i>
+                                <span>{{ booking.members_count }} persoane</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-clock"></i>
+                                <span>{{ booking.created_at|date:"j F Y" }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="booking-status {{ booking.status }}">
+                            <span class="status-badge">
+                                {% if booking.status == 'confirmed' %}
+                                    <i class="fas fa-check-circle"></i> Confirmată
+                                {% elif booking.status == 'pending' %}
+                                    <i class="fas fa-clock"></i> În așteptare
+                                {% else %}
+                                    <i class="fas fa-times-circle"></i> Anulată
+                                {% endif %}
+                            </span>
+                            
+                            {% if booking.status != 'canceled' and booking.booking_date >= today %}
+                            <div class="booking-actions">
+                                {% if booking.status == 'pending' %}
+                                    <button disabled class="btn-secondary" title="Funcționalitate în dezvoltare">
+                                        <i class="fas fa-edit"></i> Editează
+                                    </button>
+                                {% endif %}
+                                <form method="post" action="{% url 'CarpatiNest_app:cancel_booking' booking.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-danger cancel-booking">
+                                        <i class="fas fa-times"></i> Anulează
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            {% if past_bookings %}
+            <div class="past-bookings">
+                <h2>Rezervări anterioare</h2>
+                <div class="bookings-list">
+                    {% for booking in past_bookings %}
+                        <div class="booking-card past">
+                            <div class="refuge-info">
+                                <div class="refuge-image">
+                                    {% if booking.refuge.image %}
+                                        <img src="{{ booking.refuge.image.url }}" alt="{{ booking.refuge.name }}">
+                                    {% else %}
+                                        <div class="no-image">
+                                            <i class="fas fa-mountain"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="refuge-details">
+                                    <h3>{{ booking.refuge.name }}</h3>
+                                    <p class="mountain-name">{{ booking.refuge.mountain.name }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="booking-info">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>{{ booking.booking_date|date:"j F Y" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>{{ booking.members_count }} persoane</span>
+                                </div>
+                            </div>
+                            
+                            <div class="booking-status">
+                                <span class="status-badge past">
+                                    <i class="fas fa-history"></i> Trecut
+                                </span>
+                                
+                                {% if not booking.reviewed %}
+                                <div class="booking-actions">
+                                    <a href="{% url 'CarpatiNest_app:booking' refuge_id=booking.refuge.id %}#reviews" class="btn-primary">
+                                        <i class="fas fa-star"></i> Adaugă recenzie
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+        {% else %}
+            <div class="no-bookings">
+                <i class="fas fa-calendar-times"></i>
+                <h2>Nu ai încă nicio rezervare</h2>
+                <p>Explorează refugiile din munții României și fă prima ta rezervare!</p>
+                <a href="{% url 'CarpatiNest_app:mountain_selection' %}" class="btn-primary">
+                    <i class="fas fa-mountain"></i>
+                    Explorează Munții
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Confirm cancel booking
+    const cancelButtons = document.querySelectorAll('.cancel-booking');
+    
+    cancelButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!confirm('Ești sigur că vrei să anulezi această rezervare?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

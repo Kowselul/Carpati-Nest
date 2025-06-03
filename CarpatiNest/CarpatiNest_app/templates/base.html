@@ -30,6 +30,10 @@
               {% else %}
                 {{ user.username }}              {% endif %}
             </button>            <div class="dropdown-content">
+              <a href="{% url 'CarpatiNest_app:my_bookings' %}" class="dropdown-item bookings-btn">
+                <i class="fas fa-clipboard-list"></i>
+                Rezervările Mele
+              </a>
               <a href="{% url 'CarpatiNest_app:account_settings' %}" class="dropdown-item settings-btn">
                 <i class="fas fa-cog"></i>
                 Setări cont

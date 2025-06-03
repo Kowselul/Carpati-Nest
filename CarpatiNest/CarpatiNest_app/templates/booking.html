@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="{% static 'css/booking.css' %}" />
 <link rel="stylesheet" href="{% static 'css/reviews.css' %}" />
+<link rel="stylesheet" href="{% static 'css/slideshow.css' %}" />
 {% endblock %}
 
 {% block content %}
@@ -29,9 +30,7 @@
                 <i class="fas fa-chevron-down"></i>
             </a>
             {% endif %}
-        </div>
-
-        <div class="refuge-gallery">
+        </div>        <div class="refuge-gallery">
             <h2>Explorează Refugiul</h2>
             <div class="slideshow-container">
                 {% for image in refuge.images.all %}
@@ -58,17 +57,23 @@
                 {% endfor %}
             </div>
 
+            <!-- Controale navigare -->
+            <div class="slideshow-controls">
+                <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+                <a class="next" onclick="changeSlide(1)">&#10095;</a>
+            </div>
+
             <!-- Indicatori puncte -->
             <div class="dot-container">
                 {% for image in refuge.images.all %}
                     <span class="dot" onclick="currentSlide({{ forloop.counter }})" {% if forloop.first %}class="active"{% endif %}></span>
                 {% endfor %}
             </div>
-        </div>
-    </div>    <div class="booking-form-container">
-        {% if user.is_authenticated %}
-            <form method="post" class="booking-form fade-in" id="bookingForm">
+        </div>    </div>    <div class="booking-form-container">
+        {% if user.is_authenticated %}            <form method="post" class="booking-form fade-in" id="bookingForm" autocomplete="off">
                 {% csrf_token %}
+                <!-- Folosim o valoare unică pentru a preveni trimiteri multiple din aceeași sesiune -->
+                <input type="hidden" name="form_submitted" value="booking_{{ refuge.id }}_{{ user.id }}_{{ request.session.session_key }}">
                 {% if form.non_field_errors %}
                 <div class="alert alert-danger">
                     {{ form.non_field_errors }}
@@ -275,8 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
             checkAvailability(dateStr);
         }
     });
-    
-    // Funcție pentru verificarea disponibilității pentru data selectată
+      // Funcție pentru verificarea disponibilității pentru data selectată
     async function checkAvailability(date) {
         try {
             const response = await fetch(`/api/check-availability/?refuge_id={{ refuge.id }}&date=${date}`);
@@ -321,9 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.currentSlide = function(n) {
         showSlides(slideIndex = n);
-    }
-
-    function showSlides(n) {
+    }    function showSlides(n) {
         let i;
         let slides = document.getElementsByClassName("slide");
         let dots = document.getElementsByClassName("dot");
@@ -340,11 +342,29 @@ document.addEventListener('DOMContentLoaded', function() {
             dots[i].className = dots[i].className.replace(" active", "");
         }
 
+        // Afișează slide-ul curent cu un efect de fade
         slides[slideIndex-1].style.display = "block";
-        if (dots.length > 0) {
+        if (dots.length > 0 && slideIndex-1 < dots.length) {
             dots[slideIndex-1].className += " active";
         }
     }
+    
+    // Autoplay pentru slideshow
+    let slideTimer = setInterval(function() {
+        changeSlide(1);
+    }, 5000); // Schimbă slide-ul la fiecare 5 secunde
+    
+    // Oprește autoplay când utilizatorul interacționează cu slideshow-ul
+    document.querySelector('.slideshow-container').addEventListener('mouseenter', function() {
+        clearInterval(slideTimer);
+    });
+    
+    // Reporneșre autoplay când utilizatorul nu mai interacționează cu slideshow-ul
+    document.querySelector('.slideshow-container').addEventListener('mouseleave', function() {
+        slideTimer = setInterval(function() {
+            changeSlide(1);
+        }, 5000);
+    });
 
     // Show toast message function
     function showToast(message, type) {
@@ -359,39 +379,138 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             toast.remove();
         }, 5000);
-    }
-
-    // Handle form submission
+    }    // Handle form submission
     const form = document.getElementById('bookingForm');
+    if (!form) return; // Verifică dacă formularul există
+    
     const submitButton = document.getElementById('submitButton');
+    
+    // Generăm un ID unic pentru această sesiune de formular care combină ID-ul de refugiu, ID-ul utilizatorului și data curentă
+    const refugeId = {{ refuge.id }};
+    const formId = form.querySelector('[name="form_submitted"]').value;
+    const submittedKey = `booking_form_${refugeId}_${formId}`;
+    const currentDate = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    let isSubmitting = false;
+    
+    // Verifică dacă formularul a fost deja trimis în această sesiune
+    if (sessionStorage.getItem(submittedKey) === 'true') {
+        console.log('Acest formular a fost deja trimis. Se dezactivează.');
+        submitButton.setAttribute('disabled', 'disabled');
+        submitButton.textContent = 'Rezervare procesată';
+        // Dezactivează toate câmpurile pentru a preveni modificarea lor
+        Array.from(form.elements).forEach(element => {
+            element.setAttribute('disabled', 'disabled');
+        });
+    }
+    
+    // Curățăm din sessionStorage orice chei de rezervări vechi (din zilele anterioare)
+    Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith('booking_form_') && key.includes(currentDate) === false) {
+            sessionStorage.removeItem(key);
+        }
+    });
 
+    // Eliminăm comportamentul de submit standard al formularului
+    // și asigurăm-ne că doar AJAX-ul va fi folosit pentru a evita dublurile
     form.addEventListener('submit', async function(e) {
+        // Foarte important: oprim comportamentul normal de submit pentru a preveni dublurile
         e.preventDefault();
+        
+        // Verificăm dacă formularul este deja în proces de trimitere sau a fost trimis
+        if (isSubmitting || sessionStorage.getItem(submittedKey) === 'true') {
+            console.log('Formularul este deja în proces de trimitere sau a fost trimis. Se ignoră acțiunea.');
+            return false;
+        }
+        
+        // Setăm flag-ul de trimitere pentru a bloca orice altă încercare
+        isSubmitting = true;
+        
+        // Marchează formularul ca fiind trimis în sessionStorage
+        sessionStorage.setItem(submittedKey, 'true');
+        
+        // Modifică aspectul vizual al butonului și dezactivează toate câmpurile
         submitButton.classList.add('loading');
+        submitButton.setAttribute('disabled', 'disabled');
+        
+        // Dezactivează toate câmpurile formularului imediat pentru a preveni modificarea
+        Array.from(form.elements).forEach(element => {
+            if (element !== submitButton) { // Excludem butonul care a fost deja dezactivat
+                element.setAttribute('disabled', 'disabled');
+            }
+        });
 
         try {
+            // Trimitem formularul doar prin AJAX pentru a evita dublarea
             const response = await fetch(window.location.href, {
                 method: 'POST',
                 body: new FormData(form),
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    // Adăugăm un header suplimentar pentru a marca cererea ca fiind făcută prin AJAX
+                    'X-Form-Submit-Type': 'ajax'
                 }
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                showToast('Rezervarea a fost înregistrată cu succes!', 'success');
-                setTimeout(() => {
-                    window.location.href = "{% url 'CarpatiNest_app:mountain_refuges' mountain_id=refuge.mountain.id %}";
-                }, 2000);
+            });            // Verificăm tipul de conținut al răspunsului
+            const contentType = response.headers.get("content-type");
+            
+            if (contentType && contentType.includes("application/json")) {
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast('Rezervarea a fost înregistrată cu succes!', 'success');
+                    
+                    // Actualizează numărul de locuri disponibile dacă este furnizat
+                    if (result.available_spots !== undefined) {
+                        document.getElementById('available-spots-count').textContent = result.available_spots;
+                    }
+                    
+                    // Dacă avem un URL de redirecționare, îl folosim după un scurt delay
+                    // pentru a permite utilizatorului să vadă mesajul de succes
+                    if (result.redirect_url) {
+                        console.log("Redirecționare către:", result.redirect_url);
+                        setTimeout(() => {
+                            window.location.href = result.redirect_url;
+                        }, 1000);
+                    } else {
+                        // Fallback la redirecționarea implicită
+                        setTimeout(() => {
+                            window.location.href = "{% url 'CarpatiNest_app:mountain_refuges' mountain_id=refuge.mountain.id %}";
+                        }, 1500);
+                    }
+                } else {
+                    // În caz de eroare, resetăm statusul de trimitere pentru a permite reîncercarea
+                    sessionStorage.removeItem(submittedKey);
+                    isSubmitting = false;
+                    
+                    // Afișăm mesajul de eroare și resetăm UI-ul
+                    showToast(result.error || 'A apărut o eroare. Vă rugăm să încercați din nou.', 'error');
+                    submitButton.classList.remove('loading');
+                    submitButton.removeAttribute('disabled');
+                    
+                    // Reactivăm câmpurile formularului pentru a permite corectarea
+                    Array.from(form.elements).forEach(element => {
+                        element.removeAttribute('disabled');
+                    });
+                }
             } else {
-                showToast(result.error || 'A apărut o eroare. Vă rugăm să încercați din nou.', 'error');
-                submitButton.classList.remove('loading');
+                // Dacă nu este JSON, probabil este o redirecționare - o urmăm
+                window.location.href = response.url;
             }
         } catch (error) {
-            showToast('A apărut o eroare. Vă rugăm să încercați din nou.', 'error');
+            console.error('Eroare la trimiterea formularului:', error);
+            
+            // Resetăm statusul formularului pentru a permite reîncercarea
+            sessionStorage.removeItem(submittedKey);
+            isSubmitting = false;
+            
+            // Afișăm mesajul de eroare și resetăm UI-ul
+            showToast('A apărut o eroare la comunicarea cu serverul. Vă rugăm să încercați din nou.', 'error');
             submitButton.classList.remove('loading');
+            submitButton.removeAttribute('disabled');
+            
+            // Reactivăm câmpurile formularului
+            Array.from(form.elements).forEach(element => {
+                element.removeAttribute('disabled');
+            });
         }
     });
 });

@@ -12,6 +12,9 @@ urlpatterns = [
     path('mountains/', views.mountain_selection, name='mountain_selection'),
     path('mountain/<int:mountain_id>/refuges/', views.mountain_refuges, name='mountain_refuges'),
     path('booking/<int:refuge_id>/', views.booking_view, name='booking'),
+    path('booking/confirmation/<int:booking_id>/', views.booking_confirmation, name='booking_confirmation'),
+    path('my-bookings/', views.my_bookings, name='my_bookings'),
+    path('booking/cancel/<int:booking_id>/', views.cancel_booking, name='cancel_booking'),
     path('settings/', views.account_settings, name='account_settings'),
     path('api/check-availability/', views.check_availability, name='check_availability'),
 ]

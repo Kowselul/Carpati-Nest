@@ -11,13 +11,46 @@
     text-align: center;
     margin-bottom: 4rem;
     padding: 4rem 2rem;
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                url('/static/images/mountain-bg.jpg') center/cover;
+    background-color: #2d3748; /* Culoare de rezervă dacă imaginea nu se încarcă */
+    position: relative;
     border-radius: 20px;
     color: white;
-    position: relative;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Background image overlay */
+.mountain-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/static/images/mountain-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.6; /* Reducem opacitatea pentru a crea un efect de overlay */
+    z-index: 0;
+}
+
+/* Dark overlay for better text contrast */
+.mountain-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+.mountain-header h1,
+.mountain-header .mountain-info,
+.mountain-header .mountain-description {
+    position: relative;
+    z-index: 2;
 }
 
 .mountain-header h1 {

@@ -85,7 +85,7 @@ class Booking(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Rezervare {self.refuge.name} - {self.user.username} ({self.check_in_date} - {self.check_out_date})"
+        return f"Rezervare {self.refuge.name} - {self.user.username} ({self.booking_date})"
 
 class RefugeImage(models.Model):
     refuge = models.ForeignKey('Refuge', on_delete=models.CASCADE, related_name='images')
