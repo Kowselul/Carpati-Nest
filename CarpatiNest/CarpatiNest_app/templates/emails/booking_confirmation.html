@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmare Rezervare - CarpatiNest</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .email-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .email-header {
+            background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .email-logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .email-body {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .reservation-details {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .detail-row {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            display: flex;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            width: 40%;
+            color: #555;
+        }
+        .detail-value {
+            width: 60%;
+        }
+        .mountain-info {
+            background-color: #e8f5e9;
+            border-left: 4px solid #2d6a4f;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #2d6a4f;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .note {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        .email-footer {
+            background-color: #f1f1f1;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .social-links {
+            margin-top: 15px;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 5px;
+            color: #2d6a4f;
+            font-size: 18px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <div class="email-logo">CarpatiNest</div>
+            <h1>Rezervarea ta a fost confirmată!</h1>
+        </div>
+        
+        <div class="email-body">
+            <p>Salut, {{ user.first_name|default:user.username }}!</p>
+            
+            <p>Îți mulțumim pentru rezervarea făcută prin platforma CarpatiNest. Mai jos găsești detaliile rezervării tale:</p>
+            
+            <div class="reservation-details">
+                <div class="detail-row">
+                    <div class="detail-label">Refugiu:</div>
+                    <div class="detail-value">{{ refuge.name }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Locație:</div>
+                    <div class="detail-value">Munții {{ mountain.name }}</div>
+                </div>
+                {% if refuge.altitude %}
+                <div class="detail-row">
+                    <div class="detail-label">Altitudine:</div>
+                    <div class="detail-value">{{ refuge.altitude }} m</div>
+                </div>
+                {% endif %}
+                <div class="detail-row">
+                    <div class="detail-label">Data rezervării:</div>
+                    <div class="detail-value">{{ booking.booking_date|date:"j F Y" }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Număr persoane:</div>
+                    <div class="detail-value">{{ booking.members_count }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Status:</div>
+                    <div class="detail-value">{{ booking.get_status_display }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Cod rezervare:</div>
+                    <div class="detail-value">#{{ booking.id }}</div>
+                </div>
+            </div>
+              <div class="mountain-info">
+                <strong>Informație importantă:</strong>
+                <p>Rezervarea ta (cod: #{{ booking.id }}) este acum confirmată. Te rugăm să ajungi la refugiu înainte de lăsarea întunericului și să ai la tine această confirmare (digital sau imprimată).</p>
+                <p>Orar check-in recomandat: 14:00 - 18:00</p>
+            </div>
+            
+            <div class="mountain-info" style="background-color: #FFF3E0; border-left-color: #FF9800;">
+                <strong>Ce să aduci cu tine:</strong>
+                <ul>
+                    <li>Echipament corespunzător vremii</li>
+                    <li>Mâncare și apă suficientă</li>
+                    <li>Lanternă/frontală (obligatoriu în cazul ajungerii târzii)</li>
+                    <li>Dovada rezervării (pe telefon sau imprimată)</li>
+                    <li>Document de identitate</li>
+                </ul>
+            </div>
+            
+            <p>Pentru a vedea toate rezervările tale sau pentru a face modificări, accesează contul tău CarpatiNest.</p>
+            
+            <center><a href="{{ site_url }}{% url 'CarpatiNest_app:my_bookings' %}" class="btn">Vezi Rezervările Tale</a></center>
+            
+            <p class="note">Notă: Dacă dorești să anulezi această rezervare, te rugăm să o faci cu cel puțin 24 de ore înainte de data rezervării prin contul tău CarpatiNest.</p>
+            
+            <div class="mountain-info" style="background-color: #E8F4FD; border-left-color: #2196F3;">
+                <strong>Contact refugiu:</strong>
+                <p>Telefon: +40 7xx xxx xxx</p>
+                <p>În caz de urgență sau întârziere, vă rugăm să contactați administrația refugiului.</p>
+            </div>
+        </div>
+        
+        <div class="email-footer">
+            <p>© {% now "Y" %} CarpatiNest - Toate drepturile rezervate.</p>
+            <p>Acest email a fost trimis către {{ user.email }} pentru că ai făcut o rezervare pe platforma noastră.</p>
+            <div class="social-links">
+                <a href="#">FB</a>
+                <a href="#">IG</a>
+                <a href="#">TW</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

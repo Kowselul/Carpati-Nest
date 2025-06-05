@@ -11,6 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"
       rel="stylesheet"
     />    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}?v=1" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     {% block extra_css %}{% endblock %}
   </head>
@@ -54,11 +55,119 @@
         </div>
       </div>
       {% endblock navbar %}
-    </nav>
-    <main class="main-content">
+    </nav>    <main class="main-content">
       {% block content %}{% endblock %}
     </main>
-    {% block extra_js %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-top">
+          <!-- About column -->
+          <div class="footer-column">
+            <a href="{% url 'CarpatiNest_app:index' %}" class="footer-logo">CarpatiNest</a>
+            <p class="footer-description">
+              CarpatiNest este platforma ta de încredere pentru rezervări la refugii montane din munții Carpați.
+              Explorează și bucură-te de frumusețea naturii în siguranță.
+            </p>
+            <div class="footer-social">
+              <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+              <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div class="footer-column">
+            <h4 class="footer-heading">Link-uri rapide</h4>
+            <ul class="footer-links">
+              <li><a href="{% url 'CarpatiNest_app:mountain_selection' %}">Refugii montane</a></li>
+              <li><a href="{% url 'CarpatiNest_app:my_bookings' %}">Rezervările mele</a></li>
+              <li><a href="#">Despre noi</a></li>
+              <li><a href="#">Întrebări frecvente</a></li>
+              <li><a href="#">Blog</a></li>
+              <li><a href="#">Galerie</a></li>
+            </ul>
+          </div>
+
+          <!-- Legal links -->
+          <div class="footer-column">
+            <h4 class="footer-heading">Informații legale</h4>
+            <ul class="footer-links">
+              <li><a href="#">Termeni și condiții</a></li>
+              <li><a href="#">Politica de confidențialitate</a></li>
+              <li><a href="#">Politica de cookie-uri</a></li>
+              <li><a href="#">GDPR</a></li>
+              <li><a href="#">Politica de anulare</a></li>
+            </ul>
+          </div>
+
+          <!-- Contact info -->
+          <div class="footer-column">
+            <h4 class="footer-heading">Contact</h4>
+            <div class="footer-contact-item">
+              <div class="footer-contact-icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div class="footer-contact-text">
+                Strada Muntelui, Nr. 42, Brașov, România
+              </div>
+            </div>
+            <div class="footer-contact-item">
+              <div class="footer-contact-icon">
+                <i class="fas fa-phone-alt"></i>
+              </div>
+              <div class="footer-contact-text">
+                +40 755 123 456
+              </div>
+            </div>
+            <div class="footer-contact-item">
+              <div class="footer-contact-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="footer-contact-text">
+                contact@carpatinest.ro
+              </div>
+            </div>
+            <div class="footer-contact-item">
+              <div class="footer-contact-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="footer-contact-text">
+                Luni-Vineri: 9:00 - 18:00<br>
+                Sâmbătă: 10:00 - 15:00
+              </div>
+            </div>
+          </div>
+
+          <!-- Newsletter Signup -->
+          <div class="footer-column">
+            <h4 class="footer-heading">Abonare la newsletter</h4>
+            <p class="footer-description">
+              Abonează-te pentru a primi noutăți despre refugii și oferte speciale.
+            </p>
+            <form class="newsletter-form">
+              <input type="email" class="newsletter-input" placeholder="Adresa ta de email">
+              <button type="submit" class="newsletter-button">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; {% now "Y" %} CarpatiNest. Toate drepturile rezervate.</p>
+          <div class="footer-bottom-links">
+            <a href="#">Sitemap</a>
+            <a href="#">Cookies</a>
+            <a href="#">Ajutor</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+      {% block extra_js %}{% endblock %}
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/footer.js' %}"></script>
   </body>
 </html>

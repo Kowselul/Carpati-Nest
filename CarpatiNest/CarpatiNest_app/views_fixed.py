@@ -191,19 +191,19 @@ def booking_view(request, refuge_id):
                             except Exception as email_error:
                                 # Logăm eroarea dar nu întrerupem fluxul de rezervare
                                 print(f"Eroare la trimiterea email-ului de confirmare: {email_error}")
-                            
+                        
                         # Generăm URL-ul pentru redirecționare
                         redirect_url = request.build_absolute_uri(
                             reverse('CarpatiNest_app:booking_confirmation', kwargs={'booking_id': booking.id})
                         )
-                          # Răspuns pentru cereri AJAX - include booking_id pentru url fallback
+                        
+                        # Răspuns pentru cereri AJAX
                         if is_ajax_request:
                             return JsonResponse({
                                 'success': True, 
                                 'message': 'Rezervarea a fost creată cu succes!',
                                 'available_spots': remaining_spots,
-                                'redirect_url': redirect_url,
-                                'booking_id': booking.id
+                                'redirect_url': redirect_url
                             }, status=201)  # 201 Created pentru a indica succes
                         
                         # Redirectionare standard pentru cereri non-AJAX
@@ -237,26 +237,16 @@ def booking_view(request, refuge_id):
                     else:
                         # Pentru cereri non-AJAX
                         messages.error(request, error_message)
-                        return redirect('CarpatiNest_app:booking', refuge_id=refuge.id)            # Dacă formularul nu este valid, pregătim răspunsul adecvat            else:
+                        return redirect('CarpatiNest_app:booking', refuge_id=refuge.id)
+            
+            # Dacă formularul nu este valid, pregătim răspunsul adecvat
+            else:
                 if is_ajax_request:
                     errors = {field: [str(error) for error in errors_list] for field, errors_list in booking_form.errors.items()}
-                    # Adăugăm informații suplimentare pentru debugging
-                    debug_info = {
-                        'form_data_received': {k: v for k, v in request.POST.items()},
-                        'booking_date': request.POST.get('booking_date', 'missing'),
-                        'members_count': request.POST.get('members_count', 'missing')
-                    }
                     return JsonResponse({
                         'success': False,
-                        'errors': errors,
-                        'debug_info': debug_info
+                        'errors': errors
                     }, status=400)
-                else:
-                    # Pentru cereri non-AJAX, afișăm erorile și reîncărcăm pagina
-                    for field, errors_list in booking_form.errors.items():
-                        for error in errors_list:
-                            messages.error(request, f"{field}: {error}")
-                    return redirect('CarpatiNest_app:booking', refuge_id=refuge.id)
                     
             # Inițializăm formularul pentru recenzii
             review_form = ReviewForm(instance=user_review)

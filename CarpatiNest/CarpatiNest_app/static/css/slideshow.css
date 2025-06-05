@@ -1,54 +1,146 @@
-/* Stiluri pentru slideshow - Uniformizarea imaginilor */
+/* Stiluri pentru afișarea imaginii refugiului */
 
-/* Container pentru slideshow */
-.slideshow-container {
+/* Container pentru imaginea principală */
+.refuge-main-image {
     max-width: 100%;
     position: relative;
-    margin: 0 auto;
+    margin: 0 auto 20px auto;
     overflow: hidden;
-    border-radius: 10px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+    transition: all 0.4s ease;
 }
 
-/* Stiluri pentru slide-uri */
-.slide {
-    display: none;
+/* Stiluri pentru imaginea principală */
+.main-refuge-image {
     width: 100%;
-    position: relative;
-}
-
-/* Stiluri pentru imagini în slides */
-.slide img {
-    width: 100%;
-    height: 400px; /* Înălțime fixă pentru toate imaginile */
+    height: 450px; /* Înălțime fixă pentru imagine - am mărit-o puțin */
     object-fit: cover; /* Păstrează aspectul imaginii fără a o distorsiona */
     object-position: center; /* Centrează imaginea */
     display: block;
-    border-radius: 8px;
+    border-radius: 12px;
+    transition: transform 0.5s ease, filter 0.4s ease;
+}
+
+/* Efect la hover pe containerul imaginii */
+.refuge-main-image:hover {
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* Container pentru imagine cu overlay */
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+/* Efect la hover pe imaginea principală */
+.image-container:hover .main-refuge-image {
+    transform: scale(1.04);
+    filter: brightness(0.85);
+}
+
+/* Overlay pentru imagine */
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: 12px;
+}
+
+.image-container:hover .image-overlay {
+    opacity: 1;
+}
+
+/* Conținutul overlay-ului */
+.overlay-content {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+    color: white;
+    padding: 20px;
+    transform: translateY(20px);
+    transition: transform 0.5s ease;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.image-container:hover .overlay-content {
+    transform: translateY(0);
+}
+
+.overlay-content h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.overlay-content p {
+    font-size: 16px;
+    margin-bottom: 8px;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+}
+
+.overlay-content p i {
+    margin-right: 8px;
+    color: #4ade80;
 }
 
 /* Pentru containerul fără imagini */
 .no-images {
-    height: 400px;
+    height: 450px; /* Aceeași înălțime ca și imaginea principală */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #f5f7f5;
+    background: linear-gradient(135deg, #f5f7f5 0%, #e8f5e9 100%);
     color: #2d6a4f;
     text-align: center;
-    border-radius: 8px;
+    border-radius: 12px;
+    box-shadow: inset 0 0 30px rgba(45, 106, 79, 0.1);
+    transition: all 0.4s ease;
+}
+
+.no-images:hover {
+    background: linear-gradient(135deg, #e8f5e9 0%, #f5f7f5 100%);
+    box-shadow: inset 0 0 40px rgba(45, 106, 79, 0.15);
 }
 
 .no-images i {
-    font-size: 64px;
-    margin-bottom: 20px;
-    opacity: 0.7;
+    font-size: 80px;
+    margin-bottom: 25px;
+    opacity: 0.8;
+    color: #2d6a4f;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.4s ease;
+}
+
+.no-images:hover i {
+    transform: translateY(-5px);
 }
 
 .no-images p {
-    font-size: 18px;
-    margin-bottom: 10px;
+    font-size: 20px;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.no-images-subtitle {
+    font-size: 16px;
+    opacity: 0.7;
+    font-style: italic;
+    max-width: 80%;
+    line-height: 1.5;
 }
 
 .no-images-subtitle {

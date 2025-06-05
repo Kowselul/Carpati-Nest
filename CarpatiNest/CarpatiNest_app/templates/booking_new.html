@@ -14,16 +14,9 @@
 {% block content %}
 <div class="toast-container"></div>
 
-<!-- Debug info - Hidden by default -->
-<div id="debug-panel" style="display:none; position: fixed; bottom: 10px; right: 10px; background: #333; color: #fff; padding: 10px; z-index: 9999; border-radius: 5px; max-width: 400px; max-height: 200px; overflow: auto;">
-    <h4>Debug Info</h4>
-    <div id="debug-content"></div>
-    <button onclick="document.getElementById('debug-panel').style.display = 'none';" style="margin-top: 10px;">Close</button>
-</div>
-<button id="show-debug" style="position: fixed; bottom: 10px; right: 10px; background: #007bff; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; z-index: 9998;">Debug</button>
-
 <!-- Modal de confirmare rezervare -->
-<div class="modal-overlay" id="confirmationModal" style="display: none;">    <div class="modal-content">
+<div class="modal-overlay" id="confirmationModal" style="display: none;">
+    <div class="modal-content">
         <span class="close-modal" id="closeModal">&times;</span>
         <h2>Confirmare rezervare</h2>
         <p>Ești sigur că dorești să faci această rezervare?</p>
@@ -39,7 +32,8 @@
             <div class="summary-item">
                 <span class="summary-label">Număr persoane:</span>
                 <span class="summary-value" id="confirmPersons"></span>
-            </div>            <div class="summary-item">
+            </div>
+            <div class="summary-item">
                 <span class="summary-label">Preț per persoană:</span>
                 <span class="summary-value">{{ refuge.price }} RON</span>
             </div>
@@ -60,11 +54,11 @@
         <div class="refuge-details">
             <h1>{{ refuge.name }}</h1>
             {% if refuge.altitude %}
-            <p class="altitudine">Altitudine: {{ refuge.altitude }}m</p>
+            <p class="altitude">Altitudine: {{ refuge.altitude }}m</p>
             {% endif %}
-            <p class="capacitate">Capacitate: {{ refuge.capacity }} persoane</p>
-            <p class="locuri-disponibile">Locuri disponibile azi: <span id="available-spots-count">{{ available_spots }}</span></p>
-            <p class="descriere">{{ refuge.description }}</p>
+            <p class="capacity">Capacitate: {{ refuge.capacity }} persoane</p>
+            <p class="available-spots">Locuri disponibile azi: <span id="available-spots-count">{{ available_spots }}</span></p>
+            <p class="description">{{ refuge.description }}</p>
             
             {% if reviews %}
             <a href="#reviews" class="scroll-to-reviews">
@@ -72,7 +66,10 @@
                 Vezi recenziile ({{ total_reviews }})
                 <i class="fas fa-chevron-down"></i>
             </a>
-            {% endif %}        </div>        <div class="refuge-gallery">
+            {% endif %}
+        </div>
+        
+        <div class="refuge-gallery">
             <h2>Explorează Refugiul</h2>
             <div class="refuge-main-image">
                 {% if refuge.image %}
@@ -96,8 +93,12 @@
                     </div>
                 {% endif %}
             </div>
-        </div></div>    <div class="booking-form-container">
-        {% if user.is_authenticated %}            <form method="post" class="booking-form fade-in" id="bookingForm" autocomplete="off" data-refuge-id="{{ refuge.id }}" data-refuge-price="{{ refuge.price|default:0 }}">
+        </div>
+    </div>
+    
+    <div class="booking-form-container">
+        {% if user.is_authenticated %}
+            <form method="post" class="booking-form fade-in" id="bookingForm" autocomplete="off" data-refuge-id="{{ refuge.id }}" data-refuge-price="{{ refuge.price|default:0 }}">
                 {% csrf_token %}
                 <!-- Folosim o valoare unică pentru a preveni trimiteri multiple din aceeași sesiune -->
                 <input type="hidden" name="form_submitted" value="booking_{{ refuge.id }}_{{ user.id }}_{{ request.session.session_key }}">
@@ -106,7 +107,8 @@
                     {{ form.non_field_errors }}
                 </div>
                 {% endif %}
-                  <h3 class="booking-form-title">Rezervarea ta</h3>
+                
+                <h3 class="booking-form-title">Rezervarea ta</h3>
                 
                 <div class="modern-form-fields">
                     <div class="form-group date-group">
@@ -151,7 +153,8 @@
         {% else %}
             <div class="login-required">
                 <p>Pentru a face o rezervare, trebuie să fii autentificat.</p>
-                <div class="actions">                    <a href="{% url 'CarpatiNest_app:login' %}?next={{ request.path }}" class="btn btn-primary">
+                <div class="actions">
+                    <a href="{% url 'CarpatiNest_app:login' %}?next={{ request.path }}" class="btn btn-primary">
                         <i class="fas fa-sign-in-alt"></i>
                         Autentificare
                     </a>
@@ -161,8 +164,12 @@
                     </a>
                 </div>
             </div>
-        {% endif %}    </div>    <!-- Secțiune pentru recenzii -->
-    <div id="reviews" class="reviews-container"><h2 class="reviews-title">
+        {% endif %}
+    </div>
+    
+    <!-- Secțiune pentru recenzii -->
+    <div id="reviews" class="reviews-container">
+        <h2 class="reviews-title">
             <i class="fas fa-star"></i>
             Recenzii
             {% if average_rating %}
@@ -192,7 +199,8 @@
                 <form method="post" class="review-form">
                     {% csrf_token %}
                     <input type="hidden" name="review_form" value="1">
-                      <div class="rating-container">
+                    
+                    <div class="rating-container">
                         <label>Evaluarea ta</label>
                         <div class="star-rating-input">
                             <div class="stars">
@@ -232,7 +240,8 @@
             </div>
         {% endif %}
 
-        <div class="reviews-list">            {% if reviews %}
+        <div class="reviews-list">
+            {% if reviews %}
                 {% for review in reviews %}
                     <div class="review-card {% if review.user == user %}your-review{% endif %}">
                         <div class="review-header">
@@ -273,6 +282,7 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -280,143 +290,6 @@
 <script src="{% static 'js/flatpickr-init.js' %}"></script>
 <script src="{% static 'js/booking.js' %}"></script>
 <script>
-// Toast message function
-function showToast(message, type) {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-        <span>${message}</span>
-    `;
-    document.querySelector('.toast-container').appendChild(toast);
-    
-    setTimeout(() => {
-        toast.remove();
-    }, 5000);
-}
-    
-    // Smooth scrolling pentru butonul de recenzii
-    const scrollToReviews = document.querySelector('.scroll-to-reviews');
-    if (scrollToReviews) {
-        scrollToReviews.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const reviewsSection = document.getElementById('reviews');
-            reviewsSection.scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
-        });
-    }    // Initialize flatpickr
-    const datePickr = flatpickr(".flatpickr", {
-        locale: "ro",
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        disableMobile: "true",
-        altInput: true,
-        altFormat: "j F Y",
-        monthSelectorType: "static",
-        animate: true,
-        defaultDate: "today", // Setăm data curentă ca implicită pentru a evita erorile de validare
-        onChange: function(selectedDates, dateStr, instance) {
-            // Verifică disponibilitatea pentru data selectată
-            checkAvailability(dateStr);
-            console.log("Data selectată:", dateStr);
-        }
-    });
-    
-    // Verifică disponibilitatea pentru data implicită (azi)
-    if (datePickr && datePickr.length > 0) {
-        const today = new Date().toISOString().split('T')[0];
-        checkAvailability(today);
-        console.log("Verificare disponibilitate pentru azi:", today);
-    }
-      // Funcție pentru verificarea disponibilității pentru data selectată
-    async function checkAvailability(date) {
-        try {
-            const response = await fetch(`/api/check-availability/?refuge_id={{ refuge.id }}&date=${date}`);
-            const data = await response.json();
-            
-            if(response.ok) {
-                // Actualizează numărul de locuri disponibile afișat
-                document.getElementById('available-spots-count').textContent = data.available_spots;
-                
-                // Actualizează mesajul de disponibilitate
-                const membersInput = document.querySelector('#id_members_count');
-                const formHint = document.querySelector('.form-hint');
-                
-                if (data.available_spots <= 0) {
-                    formHint.textContent = 'Nu mai sunt locuri disponibile pentru această dată!';
-                    formHint.style.color = '#e53e3e';
-                    membersInput.setAttribute('disabled', 'disabled');
-                } else {
-                    formHint.textContent = `Maxim ${data.available_spots} persoane disponibile`;
-                    formHint.style.color = '';
-                    membersInput.removeAttribute('disabled');
-                    membersInput.setAttribute('max', data.available_spots);
-                    
-                    // Actualizează valoarea dacă este mai mare decât disponibilitatea
-                    if (parseInt(membersInput.value) > data.available_spots) {
-                        membersInput.value = data.available_spots;
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('Eroare la verificarea disponibilității:', error);
-        }
-    }    // Nu mai este nevoie de cod pentru slideshow, deoarece avem doar o singură imagine
-
-    // Show toast message function
-    function showToast(message, type) {
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-            <span>${message}</span>
-        `;
-        document.querySelector('.toast-container').appendChild(toast);
-        
-        setTimeout(() => {
-            toast.remove();
-        }, 5000);
-    }    // Handle form submission
-    const form = document.getElementById('bookingForm');
-    if (!form) {
-        console.error("Formularul de rezervare nu a fost găsit în DOM!");
-        return;
-    }
-    
-    const submitButton = document.getElementById('submitButton');
-    if (!submitButton) {
-        console.error("Butonul de submit nu a fost găsit în DOM!");
-    } else {
-        console.log("Butonul de submit a fost găsit:", submitButton);
-    }
-    
-    // Generăm un ID unic pentru această sesiune de formular care combină ID-ul de refugiu, ID-ul utilizatorului și data curentă
-    const refugeId = {{ refuge.id }};
-    const formId = form.querySelector('[name="form_submitted"]').value;
-    const submittedKey = `booking_form_${refugeId}_${formId}`;
-    const currentDate = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
-    let isSubmitting = false;
-      // Verifică dacă formularul a fost deja trimis în această sesiune
-    // Nu mai dezactivăm formularul bazat pe sessionStorage pentru a permite reîncercarea în caz de erori
-    // Doar verificăm și logăm pentru debug
-    if (sessionStorage.getItem(submittedKey) === 'true') {
-        console.log('Acest formular a fost deja trimis anterior, dar permite reîncercarea.');
-        // Eliminăm flag-ul pentru a permite re-trimiterea
-        sessionStorage.removeItem(submittedKey);
-    }
-    
-    // Curățăm din sessionStorage orice chei de rezervări vechi (din zilele anterioare)
-    Object.keys(sessionStorage).forEach(key => {
-        if (key.startsWith('booking_form_') && key.includes(currentDate) === false) {
-            sessionStorage.removeItem(key);
-        }
-    });    // Pentru flatpickr și verificarea disponibilității
-});
+// Additional initialization code can be added here if needed
 </script>
 {% endblock %}
-</script>
-{% endblock %}
-{% endblock %

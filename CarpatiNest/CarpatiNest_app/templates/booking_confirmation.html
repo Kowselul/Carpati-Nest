@@ -63,19 +63,31 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        console.log("Booking confirmation page loaded successfully!");
+        
+        // Mark that we reached the confirmation page successfully
+        sessionStorage.setItem('booking_confirmed', 'true');
+        
         // Cronometru pentru countdown
         let timeLeft = 5;
         const countdownElement = document.getElementById('countdown');
         const progressElement = document.getElementById('progress');
         
         function updateCountdown() {
+            if (!countdownElement || !progressElement) {
+                console.error("Countdown elements not found!");
+                return;
+            }
+            
             countdownElement.textContent = timeLeft;
             const progressWidth = ((5 - timeLeft) / 5) * 100;
             progressElement.style.width = progressWidth + '%';
             
             if (timeLeft <= 0) {
                 clearInterval(timer);
-                window.location.href = "{% url 'CarpatiNest_app:mountain_selection' %}";
+                const myBookingsUrl = "{% url 'CarpatiNest_app:my_bookings' %}";
+                console.log("Redirecting to my bookings page:", myBookingsUrl);
+                window.location.href = myBookingsUrl;
             }
             timeLeft -= 1;
         }
