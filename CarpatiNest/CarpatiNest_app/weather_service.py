@@ -1,8 +1,23 @@
-import requests
+try:
+    import requests
+except ImportError:
+    requests = None
+    
 from django.conf import settings
-from decouple import config
-import logging
 from datetime import datetime, timedelta
+import logging
+
+# Try to import decouple, if it fails use default values
+try:
+    from decouple import config
+except ImportError:
+    # Fallback function if decouple is not available
+    def config(key, default=None, cast=None):
+        import os
+        value = os.environ.get(key, default)
+        if cast and value:
+            return cast(value)
+        return value
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +27,11 @@ class WeatherService:
     """
     
     def __init__(self):
+        if not requests:
+            logger.error("requests library is not available. Weather functionality will be disabled.")
+            self.api_key = None
+            return
+            
         self.api_key = config('OPENWEATHER_API_KEY', default='')
         self.base_url = "https://api.openweathermap.org/data/2.5"
         
@@ -19,6 +39,10 @@ class WeatherService:
         """
         Obține vremea curentă pentru coordonatele date
         """
+        if not requests:
+            logger.error("requests library is not available")
+            return None
+            
         if not self.api_key:
             logger.warning("Weather API key not configured")
             return None
