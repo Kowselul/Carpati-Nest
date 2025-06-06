@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from .email_utils import send_booking_confirmation_email
+from .weather_service import WeatherService
 from .forms import PersonalInfoForm, EmailChangeForm, CustomPasswordChangeForm, CustomAuthenticationForm, CustomRegistrationForm, CustomLoginForm, AccountSettingsForm, BookingForm, ReviewForm
 from .models import Mountain, Refuge, Booking, Review
 from datetime import date
@@ -253,9 +254,31 @@ def booking_view(request, refuge_id):
     else:
         booking_form = BookingForm(refuge=refuge)
         review_form = ReviewForm(instance=user_review)
-    
-    # Calculează media rating-urilor
+      # Calculează media rating-urilor
     average_rating = reviews.values_list('rating', flat=True).aggregate(Avg('rating'))['rating__avg']
+    
+    # Obținem datele meteo pentru refugiu (dacă sunt disponibile coordonatele)
+    weather_data = None
+    weather_available = False
+    
+    if refuge.latitude and refuge.longitude:
+        try:
+            weather_service = WeatherService()
+            current_weather = weather_service.get_current_weather(refuge.latitude, refuge.longitude)
+            forecast = weather_service.get_weather_forecast(refuge.latitude, refuge.longitude)
+            alerts = weather_service.get_weather_alerts(refuge.latitude, refuge.longitude)
+            
+            weather_data = {
+                'current': current_weather,
+                'forecast': forecast,
+                'alerts': alerts,
+                'hiking_suitable': weather_service.is_good_hiking_weather(current_weather),
+                'recommendation': weather_service.get_hiking_recommendation(current_weather, alerts)
+            }
+            weather_available = True
+        except Exception as e:
+            # Logăm eroarea dar nu întrerupem loading-ul paginii
+            print(f"Eroare la obținerea datelor meteo: {e}")
     
     context = {
         'refuge': refuge,
@@ -265,7 +288,9 @@ def booking_view(request, refuge_id):
         'user_review': user_review,
         'average_rating': average_rating,
         'total_reviews': reviews.count(),
-        'available_spots': available_spots  # Adăugare locuri disponibile în context
+        'available_spots': available_spots,  # Adăugare locuri disponibile în context
+        'weather_data': weather_data,
+        'weather_available': weather_available
     }
     return render(request, 'booking.html', context)
 
@@ -387,3 +412,117 @@ def check_availability(request):
             return JsonResponse({'error': str(e)}, status=400)
     
     return JsonResponse({'error': 'Metoda nepermisă'}, status=405)
+
+
+def get_weather_for_refuge(request, refuge_id):
+    """
+    API endpoint pentru obținerea datelor meteo pentru un refugiu
+    """
+    try:
+        refuge = get_object_or_404(Refuge, id=refuge_id)
+        
+        # Verificăm dacă refugiul are coordonate GPS
+        if not refuge.latitude or not refuge.longitude:
+            return JsonResponse({
+                'error': 'Refugiul nu are coordonate GPS configurate',
+                'has_coordinates': False
+            }, status=400)
+        
+        weather_service = WeatherService()
+        
+        # Obținem vremea curentă
+        current_weather = weather_service.get_current_weather(refuge.latitude, refuge.longitude)
+        
+        # Obținem prognoza meteo
+        forecast = weather_service.get_weather_forecast(refuge.latitude, refuge.longitude)
+        
+        # Obținem alertele meteo
+        alerts = weather_service.get_weather_alerts(refuge.latitude, refuge.longitude)
+        
+        # Verificăm dacă vremea este bună pentru drumeții
+        hiking_suitability = weather_service.is_good_hiking_weather(current_weather)
+        hiking_recommendation = weather_service.get_hiking_recommendation(current_weather, alerts)
+        
+        return JsonResponse({
+            'success': True,
+            'refuge_name': refuge.name,
+            'current_weather': current_weather,
+            'forecast': forecast,
+            'alerts': alerts,
+            'hiking_suitability': hiking_suitability,
+            'hiking_recommendation': hiking_recommendation,
+            'has_coordinates': True
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Eroare la obținerea datelor meteo: {str(e)}',
+            'success': False
+        }, status=500)
+
+
+def get_weather_forecast_for_date(request, refuge_id):
+    """
+    API endpoint pentru obținerea prognozei meteo pentru o dată specifică
+    """
+    date_str = request.GET.get('date')
+    
+    if not date_str:
+        return JsonResponse({'error': 'Data este necesară'}, status=400)
+    
+    try:
+        refuge = get_object_or_404(Refuge, id=refuge_id)
+        
+        if not refuge.latitude or not refuge.longitude:
+            return JsonResponse({
+                'error': 'Refugiul nu are coordonate GPS configurate',
+                'has_coordinates': False
+            }, status=400)
+        
+        weather_service = WeatherService()
+        
+        # Obținem prognoza pentru data specificată
+        forecast = weather_service.get_weather_forecast(refuge.latitude, refuge.longitude)
+        
+        # Filtrăm prognoza pentru data dorită
+        target_date = date.fromisoformat(date_str)
+        daily_forecast = None
+        
+        for day in forecast.get('daily', []):
+            forecast_date = date.fromtimestamp(day['dt'])
+            if forecast_date == target_date:
+                daily_forecast = day
+                break
+        
+        if daily_forecast:
+            # Verificăm dacă vremea va fi bună pentru drumeții
+            hiking_suitable = weather_service.is_good_hiking_weather({
+                'weather': [{'main': daily_forecast['weather'][0]['main']}],
+                'wind': {'speed': daily_forecast.get('wind_speed', 0)},
+                'main': {
+                    'temp': daily_forecast['temp']['day'],
+                    'feels_like': daily_forecast['feels_like']['day']
+                }
+            })
+            
+            return JsonResponse({
+                'success': True,
+                'date': date_str,
+                'weather': daily_forecast,
+                'hiking_suitable': hiking_suitable,
+                'recommendation': weather_service.get_hiking_recommendation({
+                    'weather': [{'main': daily_forecast['weather'][0]['main']}],
+                    'wind': {'speed': daily_forecast.get('wind_speed', 0)}
+                }, [])
+            })
+        else:
+            return JsonResponse({
+                'error': 'Nu sunt disponibile date meteo pentru această dată',
+                'success': False
+            }, status=404)
+            
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Eroare la obținerea prognozei meteo: {str(e)}',
+            'success': False
+        }, status=500)

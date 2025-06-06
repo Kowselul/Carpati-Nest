@@ -57,8 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error("Could not find members input or form hint elements");
                     return;
                 }
-                
-                if (data.available_spots <= 0) {
+                          if (data.available_spots <= 0) {
                     formHint.textContent = 'Nu mai sunt locuri disponibile pentru această dată!';
                     formHint.style.color = '#e53e3e';
                     membersInput.setAttribute('disabled', 'disabled');
@@ -72,6 +71,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (parseInt(membersInput.value) > data.available_spots) {
                         membersInput.value = data.available_spots;
                     }
+                }
+                
+                // Check weather for selected date if weather service is available
+                if (window.weatherService && refugeId) {
+                    window.weatherService.checkWeatherForDate(refugeId, date);
                 }
             }
         } catch (error) {

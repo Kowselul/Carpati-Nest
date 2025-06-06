@@ -35,6 +35,12 @@ class Refuge(models.Model):
     altitude = models.IntegerField(verbose_name='Altitudine (m)', null=True, blank=True)
     image = models.ImageField(upload_to='refuges/', verbose_name='Imagine', null=True, blank=True)
     capacity = models.IntegerField(verbose_name='Capacitate', default=10)
+    
+    # Coordonate GPS pentru integrarea cu API-ul meteo
+    latitude = models.FloatField(verbose_name='Latitudine', null=True, blank=True, 
+                                help_text='Coordonata latitudine pentru refugiu')
+    longitude = models.FloatField(verbose_name='Longitudine', null=True, blank=True,
+                                 help_text='Coordonata longitudine pentru refugiu')
 
     def __str__(self):
         return f"{self.name} ({self.mountain.name})"

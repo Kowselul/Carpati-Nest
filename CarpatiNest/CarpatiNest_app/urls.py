@@ -17,4 +17,6 @@ urlpatterns = [
     path('booking/cancel/<int:booking_id>/', views.cancel_booking, name='cancel_booking'),
     path('settings/', views.account_settings, name='account_settings'),
     path('api/check-availability/', views.check_availability, name='check_availability'),
+    path('api/weather/<int:refuge_id>/', views.get_weather_for_refuge, name='weather_for_refuge'),
+    path('api/weather/<int:refuge_id>/forecast/', views.get_weather_forecast_for_date, name='weather_forecast_for_date'),
 ]

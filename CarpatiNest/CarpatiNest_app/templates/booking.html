@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="{% static 'css/reviews.css' %}" />
 <link rel="stylesheet" href="{% static 'css/slideshow.css' %}" />
 <link rel="stylesheet" href="{% static 'css/modal.css' %}" />
+<link rel="stylesheet" href="{% static 'css/weather.css' %}" />
 {% endblock %}
 
 {% block content %}
@@ -95,9 +96,26 @@
                         <span class="no-images-subtitle">Fotografiile vor fi adăugate în curând</span>
                     </div>
                 {% endif %}
+            </div>        </div></div>
+
+    <!-- Weather Section -->
+    {% if weather_available %}
+    <div class="weather-section">
+        <div id="weather-container"></div>
+        <div id="forecast-container"></div>
+    </div>
+    {% endif %}
+
+    <div class="booking-form-container">
+        {% if user.is_authenticated %}
+            <!-- Weather recommendation for booking -->
+            {% if weather_available %}
+            <div class="booking-weather-section">
+                <!-- Weather recommendation will be populated by JavaScript -->
             </div>
-        </div></div>    <div class="booking-form-container">
-        {% if user.is_authenticated %}            <form method="post" class="booking-form fade-in" id="bookingForm" autocomplete="off" data-refuge-id="{{ refuge.id }}" data-refuge-price="{{ refuge.price|default:0 }}">
+            {% endif %}
+            
+            <form method="post" class="booking-form fade-in" id="bookingForm" autocomplete="off" data-refuge-id="{{ refuge.id }}" data-refuge-price="{{ refuge.price|default:0 }}">
                 {% csrf_token %}
                 <!-- Folosim o valoare unică pentru a preveni trimiteri multiple din aceeași sesiune -->
                 <input type="hidden" name="form_submitted" value="booking_{{ refuge.id }}_{{ user.id }}_{{ request.session.session_key }}">
@@ -108,9 +126,7 @@
                 {% endif %}
                   <h3 class="booking-form-title">Rezervarea ta</h3>
                 
-                <div class="modern-form-fields">
-                    <div class="form-group date-group">
-                        <div class="input-icon">
+                <div class="modern-form-fields">                        <div class="input-icon">
                             <i class="fas fa-calendar-alt"></i>
                         </div>
                         <label for="{{ form.booking_date.id_for_label }}">Data rezervării</label>
@@ -120,6 +136,8 @@
                             {{ form.booking_date.errors }}
                         </div>
                         {% endif %}
+                        <!-- Weather info for selected date -->
+                        <div id="date-weather-info"></div>
                     </div>
 
                     <div class="form-group members-group">
@@ -278,6 +296,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ro.js"></script>
 <script src="{% static 'js/flatpickr-init.js' %}"></script>
+<script src="{% static 'js/weather.js' %}"></script>
 <script src="{% static 'js/booking.js' %}"></script>
 <script>
 // Toast message function
