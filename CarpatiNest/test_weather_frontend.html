@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Test</title>
+    <link rel="stylesheet" href="http://127.0.0.1:8000/static/css/weather.css">
+</head>
+<body>
+    <div class="weather-section">
+        <div class="weather-header">
+            <h2>Weather Test</h2>
+        </div>
+        <div class="weather-content">
+            <div class="current-weather-card">
+                <div class="weather-loading" id="weather-loading">
+                    <div class="weather-skeleton">
+                        <div class="skeleton-icon"></div>
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-text short"></div>
+                    </div>
+                </div>
+                <div id="weather-container" class="weather-widget" style="display: none;"></div>
+            </div>
+            
+            <div class="forecast-section">
+                <h3>5-Day Forecast</h3>
+                <div id="forecast-container" class="forecast-grid"></div>
+            </div>
+            
+            <div class="booking-weather-section">
+                <div class="booking-weather-card">
+                    <div class="weather-card-header">
+                        <h4>Booking Weather</h4>
+                    </div>
+                    <div id="booking-weather-recommendation" class="weather-recommendation-content">
+                        <p class="select-date-message">Select a date to see weather forecast</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="http://127.0.0.1:8000/static/js/weather.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            if (typeof WeatherService !== 'undefined') {
+                console.log('WeatherService found');
+                const weatherService = new WeatherService();
+                
+                // Test the weather service
+                weatherService.initializeWeatherForBooking(105);
+                
+                // Test API call directly
+                fetch('http://127.0.0.1:8000/api/weather/105/')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Weather API response:', data);
+                    })
+                    .catch(error => {
+                        console.error('Weather API error:', error);
+                    });
+            } else {
+                console.error('WeatherService not loaded');
+            }
+        });
+    </script>
+</body>
+</html>

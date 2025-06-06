@@ -12,7 +12,7 @@ class WeatherService:
     """
     
     def __init__(self):
-        self.api_key = config('WEATHER_API_KEY', default='')
+        self.api_key = config('OPENWEATHER_API_KEY', default='')
         self.base_url = "https://api.openweathermap.org/data/2.5"
         
     def get_current_weather(self, latitude, longitude):
@@ -29,8 +29,8 @@ class WeatherService:
                 'lat': latitude,
                 'lon': longitude,
                 'appid': self.api_key,
-                'units': 'metric',  # Pentru temperaturi în Celsius
-                'lang': 'ro'        # Pentru descrieri în română
+                'units': 'metric',
+                'lang': 'ro'
             }
             
             response = requests.get(url, params=params, timeout=10)
@@ -45,8 +45,8 @@ class WeatherService:
         except Exception as e:
             logger.error(f"Unexpected error in weather service: {e}")
             return None
-    
-    def get_weather_forecast(self, latitude, longitude, days=5):
+            
+    def get_forecast(self, latitude, longitude, days=5):
         """
         Obține prognoza meteo pentru următoarele zile
         """
@@ -82,6 +82,9 @@ class WeatherService:
         """
         Formatează datele meteo curente într-un format standardizat
         """
+        if not data:
+            return None
+            
         try:
             return {
                 'temperature': round(data['main']['temp']),
@@ -92,48 +95,60 @@ class WeatherService:
                 'icon': data['weather'][0]['icon'],
                 'wind_speed': data['wind']['speed'],
                 'wind_direction': data['wind'].get('deg', 0),
-                'visibility': data.get('visibility', 0) / 1000,  # Convert to km
-                'clouds': data['clouds']['all'],
-                'timestamp': datetime.now(),
-                'location': f"{data['name']}, {data['sys']['country']}"
+                'visibility': data.get('visibility', 0) / 1000,  # convertit în km
+                'location': data['name'],
+                'timestamp': datetime.now().isoformat()
             }
-        except KeyError as e:
-            logger.error(f"Error formatting weather data: {e}")
+        except (KeyError, TypeError) as e:
+            logger.error(f"Error formatting current weather data: {e}")
             return None
     
     def _format_forecast(self, data):
         """
         Formatează datele prognozei meteo
         """
+        if not data or 'list' not in data:
+            return None
+            
         try:
             forecast_list = []
-            city_info = {
-                'name': data['city']['name'],
-                'country': data['city']['country'],
-                'sunrise': datetime.fromtimestamp(data['city']['sunrise']),
-                'sunset': datetime.fromtimestamp(data['city']['sunset'])
-            }
+            daily_data = {}
             
             for item in data['list']:
-                forecast_item = {
-                    'datetime': datetime.fromtimestamp(item['dt']),
-                    'temperature': round(item['main']['temp']),
-                    'temperature_min': round(item['main']['temp_min']),
-                    'temperature_max': round(item['main']['temp_max']),
-                    'humidity': item['main']['humidity'],
-                    'description': item['weather'][0]['description'].capitalize(),
-                    'icon': item['weather'][0]['icon'],
-                    'wind_speed': item['wind']['speed'],
-                    'clouds': item['clouds']['all'],
-                    'precipitation_probability': item.get('pop', 0) * 100  # Convert to percentage
-                }
-                forecast_list.append(forecast_item)
+                dt = datetime.fromtimestamp(item['dt'])
+                date_key = dt.date()
+                
+                if date_key not in daily_data:
+                    daily_data[date_key] = {
+                        'date': date_key.isoformat(),
+                        'temperatures': [],
+                        'humidity': [],
+                        'descriptions': [],
+                        'icons': [],
+                        'wind_speeds': []
+                    }
+                
+                daily_data[date_key]['temperatures'].append(item['main']['temp'])
+                daily_data[date_key]['humidity'].append(item['main']['humidity'])
+                daily_data[date_key]['descriptions'].append(item['weather'][0]['description'])
+                daily_data[date_key]['icons'].append(item['weather'][0]['icon'])
+                daily_data[date_key]['wind_speeds'].append(item['wind']['speed'])
             
-            return {
-                'city': city_info,
-                'forecast': forecast_list
-            }
-        except KeyError as e:
+            # Creează prognoza zilnică
+            for date_key, day_data in sorted(daily_data.items()):
+                forecast_list.append({
+                    'date': day_data['date'],
+                    'min_temp': round(min(day_data['temperatures'])),
+                    'max_temp': round(max(day_data['temperatures'])),
+                    'avg_humidity': round(sum(day_data['humidity']) / len(day_data['humidity'])),
+                    'description': max(set(day_data['descriptions']), key=day_data['descriptions'].count),
+                    'icon': max(set(day_data['icons']), key=day_data['icons'].count),
+                    'avg_wind_speed': round(sum(day_data['wind_speeds']) / len(day_data['wind_speeds']), 1)
+                })
+            
+            return forecast_list[:5]  # returnează doar primele 5 zile
+            
+        except (KeyError, TypeError, ValueError) as e:
             logger.error(f"Error formatting forecast data: {e}")
             return None
     
@@ -150,35 +165,18 @@ class WeatherService:
                 'lat': latitude,
                 'lon': longitude,
                 'appid': self.api_key,
-                'exclude': 'minutely,hourly,daily',
-                'lang': 'ro'
+                'exclude': 'minutely,hourly,daily'
             }
             
             response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            
-            data = response.json()
-            alerts = data.get('alerts', [])
-            
-            formatted_alerts = []
-            for alert in alerts:
-                formatted_alert = {
-                    'event': alert['event'],
-                    'description': alert['description'],
-                    'start': datetime.fromtimestamp(alert['start']),
-                    'end': datetime.fromtimestamp(alert['end']),
-                    'sender_name': alert['sender_name']
-                }
-                formatted_alerts.append(formatted_alert)
-            
-            return formatted_alerts
-            
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('alerts', [])
+                
         except requests.RequestException as e:
             logger.error(f"Error fetching weather alerts: {e}")
-            return []
-        except Exception as e:
-            logger.error(f"Unexpected error in alerts service: {e}")
-            return []
+            
+        return []
     
     def is_good_hiking_weather(self, weather_data):
         """
@@ -187,16 +185,14 @@ class WeatherService:
         if not weather_data:
             return False
             
-        temp = weather_data['temperature']
-        wind_speed = weather_data['wind_speed']
-        humidity = weather_data['humidity']
-        description = weather_data['description'].lower()
+        temp = weather_data.get('temperature', 0)
+        wind_speed = weather_data.get('wind_speed', 0)
+        description = weather_data.get('description', '').lower()
         
-        # Criterii pentru vreme bună de drumeție
-        good_temp = -5 <= temp <= 25  # Temperatură acceptabilă
-        low_wind = wind_speed < 10    # Vânt nu prea puternic
-        no_bad_weather = not any(word in description for word in 
-                               ['ploaie', 'torentiala', 'ninsoare', 'ceata', 'furtuna'])
+        # Criterii pentru vremea bună
+        good_temp = -5 <= temp <= 35  # Temperaturi rezonabile
+        low_wind = wind_speed < 10  # Vânt moderat
+        no_bad_weather = not any(bad in description for bad in ['ploaie', 'ninsoare', 'furtună', 'ceață'])
         
         return good_temp and low_wind and no_bad_weather
     
@@ -211,41 +207,69 @@ class WeatherService:
                 'level': 'unknown'
             }
         
-        temp = weather_data['temperature']
-        wind_speed = weather_data['wind_speed']
-        description = weather_data['description'].lower()
+        temp = weather_data.get('temperature', 0)
+        wind_speed = weather_data.get('wind_speed', 0)
+        description = weather_data.get('description', '').lower()
+        humidity = weather_data.get('humidity', 0)
         
-        # Analiza detaliată
-        if any(word in description for word in ['furtuna', 'torentiala']):
+        # Analiză detaliată
+        if temp < -10:
             return {
                 'suitable': False,
-                'message': "Condiții meteorologice periculoase. Se recomandă amânarea drumeției.",
-                'level': 'dangerous'
+                'message': "Temperaturile foarte scăzute fac drumeția periculoasă. Recomandăm să amânați excursia.",
+                'level': 'danger'
             }
-        elif temp < -10 or temp > 30:
+        elif temp > 35:
             return {
                 'suitable': False,
-                'message': f"Temperatură extremă ({temp}°C). Condiții dificile pentru drumeție.",
-                'level': 'difficult'
+                'message': "Temperaturile foarte ridicate pot fi periculoase. Evitați drumeția în timpul zilei.",
+                'level': 'danger'
             }
         elif wind_speed > 15:
             return {
                 'suitable': False,
-                'message': f"Vânt puternic ({wind_speed} m/s). Drumeția poate fi periculoasă.",
-                'level': 'risky'
+                'message': "Vântul puternic face drumeția dificilă și potențial periculoasă.",
+                'level': 'danger'
             }
-        elif self.is_good_hiking_weather(weather_data):
+        elif any(bad in description for bad in ['furtună', 'lightning']):
+            return {
+                'suitable': False,
+                'message': "Condițiile meteo severe fac drumeția extrem de periculoasă.",
+                'level': 'danger'
+            }
+        elif any(bad in description for bad in ['ploaie', 'rain']):
+            return {
+                'suitable': False,
+                'message': "Ploaia face cărările alunecoase și drumeția mai periculoasă.",
+                'level': 'warning'
+            }
+        elif any(bad in description for bad in ['ninsoare', 'snow']):
+            return {
+                'suitable': False,
+                'message': "Ninsoarea poate face cărările impracticabile. Echipament de iarnă necesar.",
+                'level': 'warning'
+            }
+        elif temp < 0:
             return {
                 'suitable': True,
-                'message': "Condiții excelente pentru drumeție! Bucurați-vă de natură.",
-                'level': 'excellent'
+                'message': "Vremea este rece dar acceptabilă pentru drumeție. Echipament de iarnă recomandat.",
+                'level': 'caution'
+            }
+        elif wind_speed > 10:
+            return {
+                'suitable': True,
+                'message': "Vântul moderat. Îmbrăcați-vă corespunzător și fiți atenți.",
+                'level': 'caution'
+            }
+        elif humidity > 80:
+            return {
+                'suitable': True,
+                'message': "Umiditate ridicată. Hidratați-vă des și luați pauze regulate.",
+                'level': 'caution'
             }
         else:
             return {
                 'suitable': True,
-                'message': "Condiții acceptabile pentru drumeție. Luați echipament adecvat.",
-                'level': 'acceptable'
+                'message': "Condițiile meteo sunt excelente pentru drumeție! Bucurați-vă de natură.",
+                'level': 'excellent'
             }
-
-# Instanță globală a serviciului
-weather_service = WeatherService()

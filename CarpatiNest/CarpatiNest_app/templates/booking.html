@@ -344,11 +344,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize weather service
     if (typeof WeatherService !== 'undefined') {
-        const weatherService = new WeatherService(refugeId);
+        const weatherService = new WeatherService();
         
-        // Load current weather and forecast
-        weatherService.loadCurrentWeather();
-        weatherService.loadForecast();
+        // Initialize weather for booking page
+        weatherService.initializeWeatherForBooking(refugeId);
         
         // Store weather service globally for flatpickr integration
         window.weatherService = weatherService;

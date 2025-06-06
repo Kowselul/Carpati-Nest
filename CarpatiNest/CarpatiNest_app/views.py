@@ -265,7 +265,7 @@ def booking_view(request, refuge_id):
         try:
             weather_service = WeatherService()
             current_weather = weather_service.get_current_weather(refuge.latitude, refuge.longitude)
-            forecast = weather_service.get_weather_forecast(refuge.latitude, refuge.longitude)
+            forecast = weather_service.get_forecast(refuge.latitude, refuge.longitude)
             alerts = weather_service.get_weather_alerts(refuge.latitude, refuge.longitude)
             
             weather_data = {
@@ -429,12 +429,11 @@ def get_weather_for_refuge(request, refuge_id):
             }, status=400)
         
         weather_service = WeatherService()
-        
-        # Obținem vremea curentă
+          # Obținem vremea curentă
         current_weather = weather_service.get_current_weather(refuge.latitude, refuge.longitude)
         
         # Obținem prognoza meteo
-        forecast = weather_service.get_weather_forecast(refuge.latitude, refuge.longitude)
+        forecast = weather_service.get_forecast(refuge.latitude, refuge.longitude)
         
         # Obținem alertele meteo
         alerts = weather_service.get_weather_alerts(refuge.latitude, refuge.longitude)
@@ -463,12 +462,9 @@ def get_weather_for_refuge(request, refuge_id):
 
 def get_weather_forecast_for_date(request, refuge_id):
     """
-    API endpoint pentru obținerea prognozei meteo pentru o dată specifică
+    API endpoint pentru obținerea prognozei meteo (5-day forecast sau dată specifică)
     """
     date_str = request.GET.get('date')
-    
-    if not date_str:
-        return JsonResponse({'error': 'Data este necesară'}, status=400)
     
     try:
         refuge = get_object_or_404(Refuge, id=refuge_id)
@@ -481,39 +477,68 @@ def get_weather_forecast_for_date(request, refuge_id):
         
         weather_service = WeatherService()
         
-        # Obținem prognoza pentru data specificată
-        forecast = weather_service.get_weather_forecast(refuge.latitude, refuge.longitude)
+        # Obținem prognoza meteo
+        forecast = weather_service.get_forecast(refuge.latitude, refuge.longitude)
         
-        # Filtrăm prognoza pentru data dorită
+        if not forecast:
+            return JsonResponse({
+                'error': 'Nu sunt disponibile date meteo',
+                'success': False
+            }, status=404)
+        
+        # Dacă nu este specificată o dată, returnăm prognoza pentru 5 zile
+        if not date_str:
+            formatted_forecast = []
+            for day in forecast[:5]:  # Limităm la 5 zile
+                avg_temp = (day['min_temp'] + day['max_temp']) / 2
+                formatted_forecast.append({
+                    'date': day['date'],
+                    'temperature': round(avg_temp, 1),
+                    'min_temp': day['min_temp'],
+                    'max_temp': day['max_temp'],
+                    'description': day.get('description', ''),
+                    'wind_speed': day.get('avg_wind_speed', 0),
+                    'humidity': day.get('avg_humidity', 0)
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'forecasts': formatted_forecast
+            })
+        
+        # Dacă este specificată o dată, filtrăm prognoza pentru data dorită
         target_date = date.fromisoformat(date_str)
         daily_forecast = None
         
-        for day in forecast.get('daily', []):
-            forecast_date = date.fromtimestamp(day['dt'])
+        for day in forecast:
+            forecast_date = date.fromisoformat(day['date'])
             if forecast_date == target_date:
                 daily_forecast = day
                 break
         
         if daily_forecast:
             # Verificăm dacă vremea va fi bună pentru drumeții
-            hiking_suitable = weather_service.is_good_hiking_weather({
-                'weather': [{'main': daily_forecast['weather'][0]['main']}],
-                'wind': {'speed': daily_forecast.get('wind_speed', 0)},
-                'main': {
-                    'temp': daily_forecast['temp']['day'],
-                    'feels_like': daily_forecast['feels_like']['day']
-                }
-            })
+            avg_temp = (daily_forecast['min_temp'] + daily_forecast['max_temp']) / 2
+            weather_data = {
+                'temperature': avg_temp,
+                'wind_speed': daily_forecast.get('avg_wind_speed', 0),
+                'description': daily_forecast.get('description', ''),
+                'humidity': daily_forecast.get('avg_humidity', 0)
+            }
+            
+            hiking_suitable = weather_service.is_good_hiking_weather(weather_data)
+            hiking_recommendation = weather_service.get_hiking_recommendation(weather_data)
             
             return JsonResponse({
                 'success': True,
                 'date': date_str,
+                'temperature': avg_temp,
+                'description': daily_forecast.get('description', ''),
+                'wind_speed': daily_forecast.get('avg_wind_speed', 0),
+                'humidity': daily_forecast.get('avg_humidity', 0),
                 'weather': daily_forecast,
                 'hiking_suitable': hiking_suitable,
-                'recommendation': weather_service.get_hiking_recommendation({
-                    'weather': [{'main': daily_forecast['weather'][0]['main']}],
-                    'wind': {'speed': daily_forecast.get('wind_speed', 0)}
-                }, [])
+                'recommendation': hiking_recommendation
             })
         else:
             return JsonResponse({
