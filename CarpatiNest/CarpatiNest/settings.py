@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+fpomk)a_!!yfb!bn(3hx0g4vm2xi^+0y#lgvc%!ah3-trrd_7'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-+fpomk)a_!!yfb!bn(3hx0g4vm2xi^+0y#lgvc%!ah3-trrd_7')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = []
 
@@ -140,9 +141,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'a@a.com'  # Înlocuiește cu adresa ta de Gmail
-EMAIL_HOST_PASSWORD = 'asdwas'  # Înlocuiește cu parola de aplicație generată din contul Google
-DEFAULT_FROM_EMAIL = 'a@a.com'  # Adresa de la care se vor trimite email-urile
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=config('EMAIL_HOST_USER', default=''))
 
 # Pentru dezvoltare, poți folosi backend-ul de consolă:
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
