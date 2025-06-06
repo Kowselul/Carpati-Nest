@@ -188,12 +188,12 @@ class WeatherService {
         if (!container) {
             console.error(`Container ${containerId} not found`);
             return;
-        }        if (!forecastData.forecast || !Array.isArray(forecastData.forecast)) {
+        }        if (!forecastData.forecasts || !Array.isArray(forecastData.forecasts)) {
             container.innerHTML = '<div class="forecast-error">No forecast data available</div>';
             return;
         }
 
-        const forecastHTML = forecastData.forecast.map(forecast => {
+        const forecastHTML = forecastData.forecasts.map(forecast => {
             const iconClass = this.getWeatherIcon(forecast.description);
             const date = new Date(forecast.date).toLocaleDateString('en-US', {
                 weekday: 'short',
