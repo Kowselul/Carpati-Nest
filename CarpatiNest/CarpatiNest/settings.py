@@ -135,13 +135,14 @@ LOGIN_REDIRECT_URL = 'CarpatiNest_app:index'
 LOGOUT_REDIRECT_URL = '/'  # Redirect to homepage after logout
 LOGIN_URL = 'CarpatiNest_app:login'
 
-# Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Pentru dezvoltare (afișează email-uri în consolă)
-# În producție, modifică cu setările pentru SMTP:
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'  # sau alt provider SMTP
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your-email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your-app-password'
-DEFAULT_FROM_EMAIL = 'noreply@carpatinest.ro'
+# Email settings for Gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bocanciiulian2000@gmail.com'  # Înlocuiește cu adresa ta de Gmail
+EMAIL_HOST_PASSWORD = 'rapx lwpr rnvo eggy'  # Înlocuiește cu parola de aplicație generată din contul Google
+DEFAULT_FROM_EMAIL = 'mataspartan23@gmail.com'  # Adresa de la care se vor trimite email-urile
+
+# Pentru dezvoltare, poți folosi backend-ul de consolă:
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

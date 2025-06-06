@@ -14,21 +14,28 @@
 {% block content %}
 <div class="toast-container"></div>
 
+<!-- Note about emails in development mode -->
+{% if request.META.SERVER_NAME == 'localhost' or request.META.SERVER_NAME == '127.0.0.1' %}
+<div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
+    <strong>Note:</strong> În modul de dezvoltare, email-urile sunt trimise la consola Django, nu la adresa ta de email.
+    <br>Verifică consola pentru a vedea conținutul email-urilor.
+</div>
+{% endif %}
+
 <!-- Debug info - Hidden by default -->
-<div id="debug-panel" style="display:none; position: fixed; bottom: 10px; right: 10px; background: #333; color: #fff; padding: 10px; z-index: 9999; border-radius: 5px; max-width: 400px; max-height: 200px; overflow: auto;">
+<div id="debug-panel" style="display:none; position: fixed; bottom: 10px; left: 10px; background: #333; color: #fff; padding: 10px; z-index: 9999; border-radius: 5px; max-width: 400px; max-height: 200px; overflow: auto;">
     <h4>Debug Info</h4>
     <div id="debug-content"></div>
     <button onclick="document.getElementById('debug-panel').style.display = 'none';" style="margin-top: 10px;">Close</button>
 </div>
-<button id="show-debug" style="position: fixed; bottom: 10px; right: 10px; background: #007bff; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; z-index: 9998;">Debug</button>
+<button id="show-debug" style="position: fixed; bottom: 10px; left: 10px; background: #007bff; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; z-index: 9998;">Debug</button>
 
 <!-- Modal de confirmare rezervare -->
 <div class="modal-overlay" id="confirmationModal" style="display: none;">    <div class="modal-content">
         <span class="close-modal" id="closeModal">&times;</span>
         <h2>Confirmare rezervare</h2>
         <p>Ești sigur că dorești să faci această rezervare?</p>
-        <div class="booking-summary">
-            <div class="summary-item">
+        <div class="booking-summary">            <div class="summary-item">
                 <span class="summary-label">Refugiu:</span>
                 <span class="summary-value" id="confirmRefuge">{{ refuge.name }}</span>
             </div>
@@ -39,13 +46,6 @@
             <div class="summary-item">
                 <span class="summary-label">Număr persoane:</span>
                 <span class="summary-value" id="confirmPersons"></span>
-            </div>            <div class="summary-item">
-                <span class="summary-label">Preț per persoană:</span>
-                <span class="summary-value">{{ refuge.price }} RON</span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Cost total:</span>
-                <span class="summary-value" id="confirmTotalCost"></span>
             </div>
         </div>
         <div class="modal-actions">
