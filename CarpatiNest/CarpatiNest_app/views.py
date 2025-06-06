@@ -273,7 +273,7 @@ def booking_view(request, refuge_id):
                 'forecast': forecast,
                 'alerts': alerts,
                 'hiking_suitable': weather_service.is_good_hiking_weather(current_weather),
-                'recommendation': weather_service.get_hiking_recommendation(current_weather, alerts)
+                'recommendation': weather_service.get_hiking_recommendation(current_weather)
             }
             weather_available = True
         except Exception as e:
@@ -441,7 +441,7 @@ def get_weather_for_refuge(request, refuge_id):
         
         # Verificăm dacă vremea este bună pentru drumeții
         hiking_suitability = weather_service.is_good_hiking_weather(current_weather)
-        hiking_recommendation = weather_service.get_hiking_recommendation(current_weather, alerts)
+        hiking_recommendation = weather_service.get_hiking_recommendation(current_weather)
         
         return JsonResponse({
             'success': True,

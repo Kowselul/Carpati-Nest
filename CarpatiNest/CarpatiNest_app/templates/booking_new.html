@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="{% static 'css/reviews.css' %}" />
 <link rel="stylesheet" href="{% static 'css/slideshow.css' %}" />
 <link rel="stylesheet" href="{% static 'css/modal.css' %}" />
+<link rel="stylesheet" href="{% static 'css/weather.css' %}" />
 {% endblock %}
 
 {% block content %}
@@ -91,13 +92,59 @@
                         <p>Nu există imagini disponibile pentru acest refugiu</p>
                         <span class="no-images-subtitle">Fotografiile vor fi adăugate în curând</span>
                     </div>
-                {% endif %}
-            </div>
+                {% endif %}            </div>
         </div>
     </div>
     
-    <div class="booking-form-container">
+    <!-- Weather Section -->
+    <div class="weather-section">
+        <div class="weather-header">
+            <h2><i class="fas fa-cloud-sun"></i> Vremea la {{ refuge.name }}</h2>
+            <p class="weather-subtitle">Informații meteo pentru a-ți planifica perfect excursia</p>
+        </div>
+        
+        <div class="weather-content">
+            <!-- Current Weather Widget -->
+            <div class="current-weather-card">
+                <div class="weather-loading" id="weather-loading">
+                    <div class="weather-skeleton">
+                        <div class="skeleton-icon"></div>
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-text short"></div>
+                    </div>
+                </div>
+                <div id="weather-container" class="weather-widget" style="display: none;"></div>
+            </div>
+            
+            <!-- Weather Forecast -->
+            <div class="forecast-section">
+                <h3><i class="fas fa-calendar-week"></i> Prognoza pe 5 zile</h3>
+                <div id="forecast-container" class="forecast-grid"></div>
+            </div>
+            
+            <!-- Hiking Recommendation -->
+            <div class="hiking-recommendation" id="hiking-recommendation">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>    <div class="booking-form-container">
         {% if user.is_authenticated %}
+            <!-- Weather recommendation for booking -->
+            <div class="booking-weather-section">
+                <div class="booking-weather-card">
+                    <div class="weather-card-header">
+                        <h4><i class="fas fa-thermometer-half"></i> Vremea pentru rezervarea ta</h4>
+                        <p class="weather-card-subtitle">Verifică condițiile pentru data selectată</p>
+                    </div>
+                    <div id="booking-weather-recommendation" class="weather-recommendation-content">
+                        <p class="select-date-message">
+                            <i class="fas fa-calendar-plus"></i> 
+                            Selectează o dată pentru a vedea prognoza meteo
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
             <form method="post" class="booking-form fade-in" id="bookingForm" autocomplete="off" data-refuge-id="{{ refuge.id }}" data-refuge-price="{{ refuge.price|default:0 }}">
                 {% csrf_token %}
                 <!-- Folosim o valoare unică pentru a preveni trimiteri multiple din aceeași sesiune -->
@@ -287,9 +334,27 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ro.js"></script>
+<script src="{% static 'js/weather.js' %}"></script>
 <script src="{% static 'js/flatpickr-init.js' %}"></script>
 <script src="{% static 'js/booking.js' %}"></script>
 <script>
-// Additional initialization code can be added here if needed
+// Initialize weather service for the refuge
+document.addEventListener('DOMContentLoaded', function() {
+    const refugeId = {{ refuge.id }};
+    
+    // Initialize weather service
+    if (typeof WeatherService !== 'undefined') {
+        const weatherService = new WeatherService(refugeId);
+        
+        // Load current weather and forecast
+        weatherService.loadCurrentWeather();
+        weatherService.loadForecast();
+        
+        // Store weather service globally for flatpickr integration
+        window.weatherService = weatherService;
+    } else {
+        console.error('WeatherService not loaded');
+    }
+});
 </script>
 {% endblock %}

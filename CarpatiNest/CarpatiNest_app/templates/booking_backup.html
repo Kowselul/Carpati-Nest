@@ -15,14 +15,28 @@
 {% block content %}
 <div class="toast-container"></div>
 
+<!-- Note about emails in development mode -->
+{% if request.META.SERVER_NAME == 'localhost' or request.META.SERVER_NAME == '127.0.0.1' %}
+<div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
+    <strong>Note:</strong> În modul de dezvoltare, email-urile sunt trimise la consola Django, nu la adresa ta de email.
+    <br>Verifică consola pentru a vedea conținutul email-urilor.
+</div>
+{% endif %}
+
+<!-- Debug info - Hidden by default -->
+<div id="debug-panel" style="display:none; position: fixed; bottom: 10px; left: 10px; background: #333; color: #fff; padding: 10px; z-index: 9999; border-radius: 5px; max-width: 400px; max-height: 200px; overflow: auto;">
+    <h4>Debug Info</h4>
+    <div id="debug-content"></div>
+    <button onclick="document.getElementById('debug-panel').style.display = 'none';" style="margin-top: 10px;">Close</button>
+</div>
+<button id="show-debug" style="position: fixed; bottom: 10px; left: 10px; background: #007bff; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; z-index: 9998;">Debug</button>
+
 <!-- Modal de confirmare rezervare -->
-<div class="modal-overlay" id="confirmationModal" style="display: none;">
-    <div class="modal-content">
+<div class="modal-overlay" id="confirmationModal" style="display: none;">    <div class="modal-content">
         <span class="close-modal" id="closeModal">&times;</span>
         <h2>Confirmare rezervare</h2>
         <p>Ești sigur că dorești să faci această rezervare?</p>
-        <div class="booking-summary">
-            <div class="summary-item">
+        <div class="booking-summary">            <div class="summary-item">
                 <span class="summary-label">Refugiu:</span>
                 <span class="summary-value" id="confirmRefuge">{{ refuge.name }}</span>
             </div>
@@ -33,14 +47,6 @@
             <div class="summary-item">
                 <span class="summary-label">Număr persoane:</span>
                 <span class="summary-value" id="confirmPersons"></span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Preț per persoană:</span>
-                <span class="summary-value">{{ refuge.price }} RON</span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Cost total:</span>
-                <span class="summary-value" id="confirmTotalCost"></span>
             </div>
         </div>
         <div class="modal-actions">
@@ -55,11 +61,11 @@
         <div class="refuge-details">
             <h1>{{ refuge.name }}</h1>
             {% if refuge.altitude %}
-            <p class="altitude">Altitudine: {{ refuge.altitude }}m</p>
+            <p class="altitudine">Altitudine: {{ refuge.altitude }}m</p>
             {% endif %}
-            <p class="capacity">Capacitate: {{ refuge.capacity }} persoane</p>
-            <p class="available-spots">Locuri disponibile azi: <span id="available-spots-count">{{ available_spots }}</span></p>
-            <p class="description">{{ refuge.description }}</p>
+            <p class="capacitate">Capacitate: {{ refuge.capacity }} persoane</p>
+            <p class="locuri-disponibile">Locuri disponibile azi: <span id="available-spots-count">{{ available_spots }}</span></p>
+            <p class="descriere">{{ refuge.description }}</p>
             
             {% if reviews %}
             <a href="#reviews" class="scroll-to-reviews">
@@ -67,10 +73,7 @@
                 Vezi recenziile ({{ total_reviews }})
                 <i class="fas fa-chevron-down"></i>
             </a>
-            {% endif %}
-        </div>
-        
-        <div class="refuge-gallery">
+            {% endif %}        </div>        <div class="refuge-gallery">
             <h2>Explorează Refugiul</h2>
             <div class="refuge-main-image">
                 {% if refuge.image %}
@@ -92,11 +95,8 @@
                         <p>Nu există imagini disponibile pentru acest refugiu</p>
                         <span class="no-images-subtitle">Fotografiile vor fi adăugate în curând</span>
                     </div>
-                {% endif %}            </div>
-        </div>
-    </div>
-    
-    <!-- Weather Section -->
+                {% endif %}
+            </div>        </div></div>    <!-- Weather Section -->
     <div class="weather-section">
         <div class="weather-header">
             <h2><i class="fas fa-cloud-sun"></i> Vremea la {{ refuge.name }}</h2>
@@ -127,21 +127,31 @@
                 <!-- Will be populated by JavaScript -->
             </div>
         </div>
-    </div>    <div class="booking-form-container">
-        {% if user.is_authenticated %}
-            <!-- Weather recommendation for booking -->
+    </div>
+
+    <div class="booking-form-container">
+        {% if user.is_authenticated %}            <!-- Weather recommendation for booking -->
             <div class="booking-weather-section">
                 <div class="booking-weather-card">
                     <div class="weather-card-header">
-                        <h4><i class="fas fa-thermometer-half"></i> Vremea pentru rezervarea ta</h4>
-                        <p class="weather-card-subtitle">Verifică condițiile pentru data selectată</p>
+                        <i class="fas fa-hiking"></i>
+                        <h4>Recomandări pentru drumeție</h4>
                     </div>
                     <div id="booking-weather-recommendation" class="weather-recommendation-content">
-                        <p class="select-date-message">
-                            <i class="fas fa-calendar-plus"></i> 
-                            Selectează o dată pentru a vedea prognoza meteo
-                        </p>
+                        <div class="weather-recommendation-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Se verifică condițiile meteo...</span>
+                        </div>
                     </div>
+                </div>
+                
+                <!-- Date-specific weather info -->
+                <div class="date-weather-section" id="date-weather-section" style="display: none;">
+                    <div class="date-weather-header">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>Vremea pentru data selectată</span>
+                    </div>
+                    <div id="date-weather-info" class="date-weather-content"></div>
                 </div>
             </div>
             
@@ -154,12 +164,9 @@
                     {{ form.non_field_errors }}
                 </div>
                 {% endif %}
+                  <h3 class="booking-form-title">Rezervarea ta</h3>
                 
-                <h3 class="booking-form-title">Rezervarea ta</h3>
-                
-                <div class="modern-form-fields">
-                    <div class="form-group date-group">
-                        <div class="input-icon">
+                <div class="modern-form-fields">                        <div class="input-icon">
                             <i class="fas fa-calendar-alt"></i>
                         </div>
                         <label for="{{ form.booking_date.id_for_label }}">Data rezervării</label>
@@ -167,8 +174,7 @@
                         {% if form.booking_date.errors %}
                         <div class="alert alert-danger">
                             {{ form.booking_date.errors }}
-                        </div>
-                        {% endif %}
+                        </div>                        {% endif %}
                     </div>
 
                     <div class="form-group members-group">
@@ -200,8 +206,7 @@
         {% else %}
             <div class="login-required">
                 <p>Pentru a face o rezervare, trebuie să fii autentificat.</p>
-                <div class="actions">
-                    <a href="{% url 'CarpatiNest_app:login' %}?next={{ request.path }}" class="btn btn-primary">
+                <div class="actions">                    <a href="{% url 'CarpatiNest_app:login' %}?next={{ request.path }}" class="btn btn-primary">
                         <i class="fas fa-sign-in-alt"></i>
                         Autentificare
                     </a>
@@ -211,12 +216,8 @@
                     </a>
                 </div>
             </div>
-        {% endif %}
-    </div>
-    
-    <!-- Secțiune pentru recenzii -->
-    <div id="reviews" class="reviews-container">
-        <h2 class="reviews-title">
+        {% endif %}    </div>    <!-- Secțiune pentru recenzii -->
+    <div id="reviews" class="reviews-container"><h2 class="reviews-title">
             <i class="fas fa-star"></i>
             Recenzii
             {% if average_rating %}
@@ -246,8 +247,7 @@
                 <form method="post" class="review-form">
                     {% csrf_token %}
                     <input type="hidden" name="review_form" value="1">
-                    
-                    <div class="rating-container">
+                      <div class="rating-container">
                         <label>Evaluarea ta</label>
                         <div class="star-rating-input">
                             <div class="stars">
@@ -287,8 +287,7 @@
             </div>
         {% endif %}
 
-        <div class="reviews-list">
-            {% if reviews %}
+        <div class="reviews-list">            {% if reviews %}
                 {% for review in reviews %}
                     <div class="review-card {% if review.user == user %}your-review{% endif %}">
                         <div class="review-header">
@@ -329,32 +328,220 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ro.js"></script>
-<script src="{% static 'js/weather.js' %}"></script>
 <script src="{% static 'js/flatpickr-init.js' %}"></script>
+<script src="{% static 'js/weather.js' %}"></script>
 <script src="{% static 'js/booking.js' %}"></script>
 <script>
-// Initialize weather service for the refuge
-document.addEventListener('DOMContentLoaded', function() {
-    const refugeId = {{ refuge.id }};
+// Toast message function
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+    `;
+    document.querySelector('.toast-container').appendChild(toast);
     
-    // Initialize weather service
-    if (typeof WeatherService !== 'undefined') {
-        const weatherService = new WeatherService(refugeId);
-        
-        // Load current weather and forecast
-        weatherService.loadCurrentWeather();
-        weatherService.loadForecast();
-        
-        // Store weather service globally for flatpickr integration
-        window.weatherService = weatherService;
-    } else {
-        console.error('WeatherService not loaded');
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+    
+    // Smooth scrolling pentru butonul de recenzii
+    const scrollToReviews = document.querySelector('.scroll-to-reviews');
+    if (scrollToReviews) {
+        scrollToReviews.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const reviewsSection = document.getElementById('reviews');
+            reviewsSection.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        });
+    }    // Initialize flatpickr
+    const datePickr = flatpickr(".flatpickr", {
+        locale: "ro",
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disableMobile: "true",
+        altInput: true,
+        altFormat: "j F Y",
+        monthSelectorType: "static",
+        animate: true,
+        defaultDate: "today", // Setăm data curentă ca implicită pentru a evita erorile de validare
+        onChange: function(selectedDates, dateStr, instance) {
+            // Verifică disponibilitatea pentru data selectată
+            checkAvailability(dateStr);
+            console.log("Data selectată:", dateStr);
+        }
+    });
+    
+    // Verifică disponibilitatea pentru data implicită (azi)
+    if (datePickr && datePickr.length > 0) {
+        const today = new Date().toISOString().split('T')[0];
+        checkAvailability(today);
+        console.log("Verificare disponibilitate pentru azi:", today);
     }
+      // Funcție pentru verificarea disponibilității pentru data selectată
+    async function checkAvailability(date) {
+        try {
+            const response = await fetch(`/api/check-availability/?refuge_id={{ refuge.id }}&date=${date}`);
+            const data = await response.json();
+            
+            if(response.ok) {
+                // Actualizează numărul de locuri disponibile afișat
+                document.getElementById('available-spots-count').textContent = data.available_spots;
+                
+                // Actualizează mesajul de disponibilitate
+                const membersInput = document.querySelector('#id_members_count');
+                const formHint = document.querySelector('.form-hint');
+                
+                if (data.available_spots <= 0) {
+                    formHint.textContent = 'Nu mai sunt locuri disponibile pentru această dată!';
+                    formHint.style.color = '#e53e3e';
+                    membersInput.setAttribute('disabled', 'disabled');
+                } else {
+                    formHint.textContent = `Maxim ${data.available_spots} persoane disponibile`;
+                    formHint.style.color = '';
+                    membersInput.removeAttribute('disabled');
+                    membersInput.setAttribute('max', data.available_spots);
+                    
+                    // Actualizează valoarea dacă este mai mare decât disponibilitatea
+                    if (parseInt(membersInput.value) > data.available_spots) {
+                        membersInput.value = data.available_spots;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Eroare la verificarea disponibilității:', error);
+        }
+    }    // Nu mai este nevoie de cod pentru slideshow, deoarece avem doar o singură imagine
+
+    // Show toast message function
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+        `;
+        document.querySelector('.toast-container').appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
+    }    // Handle form submission
+    const form = document.getElementById('bookingForm');
+    if (!form) {
+        console.error("Formularul de rezervare nu a fost găsit în DOM!");
+        return;
+    }
+    
+    const submitButton = document.getElementById('submitButton');
+    if (!submitButton) {
+        console.error("Butonul de submit nu a fost găsit în DOM!");
+    } else {
+        console.log("Butonul de submit a fost găsit:", submitButton);
+    }
+    
+    // Generăm un ID unic pentru această sesiune de formular care combină ID-ul de refugiu, ID-ul utilizatorului și data curentă
+    const refugeId = {{ refuge.id }};
+    const formId = form.querySelector('[name="form_submitted"]').value;
+    const submittedKey = `booking_form_${refugeId}_${formId}`;
+    const currentDate = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    let isSubmitting = false;
+      // Verifică dacă formularul a fost deja trimis în această sesiune
+    // Nu mai dezactivăm formularul bazat pe sessionStorage pentru a permite reîncercarea în caz de erori
+    // Doar verificăm și logăm pentru debug
+    if (sessionStorage.getItem(submittedKey) === 'true') {
+        console.log('Acest formular a fost deja trimis anterior, dar permite reîncercarea.');
+        // Eliminăm flag-ul pentru a permite re-trimiterea
+        sessionStorage.removeItem(submittedKey);
+    }
+      // Curățăm din sessionStorage orice chei de rezervări vechi (din zilele anterioare)
+    Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith('booking_form_') && key.includes(currentDate) === false) {
+            sessionStorage.removeItem(key);
+        }
+    });
+    
+    // Initialize Weather Service for Booking Page
+    const weatherService = new WeatherService();
+    
+    // Load weather for the refuge
+    async function initializeWeather() {
+        try {
+            console.log('Initializing weather for refuge ID:', refugeId);
+            
+            // Load current weather widget
+            await weatherService.loadWeatherWidget(refugeId, 'weather-container');
+            
+            // Load forecast
+            await weatherService.loadForecast(refugeId, 'forecast-container');
+            
+            // Load hiking recommendation
+            await weatherService.loadHikingRecommendation(refugeId, 'hiking-recommendation');
+            
+            // Load booking weather recommendation
+            await weatherService.loadBookingWeatherRecommendation(refugeId, 'booking-weather-recommendation');
+            
+            // Hide loading skeleton and show weather
+            const loading = document.getElementById('weather-loading');
+            const weatherContainer = document.getElementById('weather-container');
+            
+            if (loading && weatherContainer) {
+                loading.style.display = 'none';
+                weatherContainer.style.display = 'block';
+            }
+            
+        } catch (error) {
+            console.error('Error initializing weather:', error);
+            
+            // Hide loading and show error message
+            const loading = document.getElementById('weather-loading');
+            if (loading) {
+                loading.innerHTML = `
+                    <div class="weather-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Nu s-au putut încărca informațiile meteo</span>
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    // Initialize weather when page loads
+    initializeWeather();
+    
+    // Update weather when date changes
+    const originalOnChange = datePickr.config.onChange;
+    datePickr.config.onChange = function(selectedDates, dateStr, instance) {
+        // Call original onChange if it exists
+        if (originalOnChange) {
+            originalOnChange.apply(this, arguments);
+        }
+        
+        // Update weather for selected date
+        if (selectedDates.length > 0) {
+            const selectedDate = selectedDates[0];
+            const dateString = selectedDate.toISOString().split('T')[0];
+            
+            // Show date weather section
+            const dateWeatherSection = document.getElementById('date-weather-section');
+            if (dateWeatherSection) {
+                dateWeatherSection.style.display = 'block';
+                dateWeatherSection.classList.add('show');
+                
+                // Load weather for specific date
+                weatherService.loadDateWeather(refugeId, dateString, 'date-weather-info');
+            }
+        }
+    };
 });
 </script>
 {% endblock %}

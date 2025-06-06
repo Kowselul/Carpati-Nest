@@ -67,7 +67,7 @@ class WeatherService {
         try {
             const response = await fetch(`${this.apiBaseUrl}/${refugeId}/`);
             const data = await response.json();
-            
+
             if (data.success) {
                 this.setCachedWeather(refugeId, data);
                 return data;
@@ -85,7 +85,7 @@ class WeatherService {
         try {
             const response = await fetch(`${this.apiBaseUrl}/${refugeId}/forecast/?date=${date}`);
             const data = await response.json();
-            
+
             if (data.success) {
                 return data;
             } else {
@@ -106,7 +106,7 @@ class WeatherService {
         const iconClass = this.getWeatherIcon(current.weather[0].main);
         const recStyle = this.getHikingRecommendationStyle(recommendation.recommendation);
 
-        const alertsHtml = alerts && alerts.length > 0 ? 
+        const alertsHtml = alerts && alerts.length > 0 ?
             `<div class="weather-alerts show">
                 <div class="alert-title">
                     <i class="fas fa-exclamation-triangle"></i>
@@ -177,19 +177,19 @@ class WeatherService {
     // Render forecast widget
     renderForecastWidget(container, forecastData) {
         const forecast = forecastData.forecast;
-        
+
         if (!forecast || !forecast.daily) {
             container.innerHTML = '<div class="weather-error">Nu sunt disponibile date de prognoză</div>';
             return;
         }
 
         const forecastDays = forecast.daily.slice(0, 5); // Show 5 days
-        
+
         const forecastHtml = forecastDays.map(day => {
             const date = new Date(day.dt * 1000);
             const dayName = date.toLocaleDateString('ro-RO', { weekday: 'short', day: 'numeric', month: 'short' });
             const iconClass = this.getWeatherIcon(day.weather[0].main);
-            
+
             return `
                 <div class="forecast-day">
                     <div class="forecast-date">${dayName}</div>
@@ -255,7 +255,7 @@ class WeatherService {
     async initializeWeatherForBooking(refugeId) {
         const weatherContainer = document.getElementById('weather-container');
         const forecastContainer = document.getElementById('forecast-container');
-        
+
         if (!weatherContainer) {
             console.warn('Weather container not found');
             return;
@@ -263,22 +263,22 @@ class WeatherService {
 
         try {
             this.showWeatherLoading(weatherContainer);
-            
+
             const weatherData = await this.fetchWeatherData(refugeId);
-            
+
             if (weatherData.has_coordinates) {
                 this.renderWeatherWidget(weatherContainer, weatherData);
-                
+
                 if (forecastContainer) {
                     this.renderForecastWidget(forecastContainer, weatherData);
                 }
-                
+
                 // Update booking recommendation based on weather
                 this.updateBookingRecommendation(weatherData);
             } else {
                 this.showWeatherUnavailable(weatherContainer);
             }
-            
+
         } catch (error) {
             this.showWeatherError(weatherContainer, error.message);
         }
@@ -287,12 +287,12 @@ class WeatherService {
     // Update booking recommendation based on weather
     updateBookingRecommendation(weatherData) {
         const bookingWeatherSection = document.querySelector('.booking-weather-section');
-        
+
         if (!bookingWeatherSection) return;
 
         const recommendation = weatherData.hiking_recommendation;
         const recStyle = this.getHikingRecommendationStyle(recommendation.recommendation);
-        
+
         let alertClass = '';
         if (recStyle.class === 'poor') {
             alertClass = 'danger';
@@ -318,7 +318,7 @@ class WeatherService {
     async checkWeatherForDate(refugeId, selectedDate) {
         try {
             const weatherData = await this.fetchWeatherForDate(refugeId, selectedDate);
-            
+
             if (weatherData.success) {
                 this.updateDateWeatherInfo(weatherData);
             }
@@ -330,15 +330,15 @@ class WeatherService {
     // Update weather info for selected date
     updateDateWeatherInfo(weatherData) {
         const dateWeatherInfo = document.getElementById('date-weather-info');
-        
+
         if (!dateWeatherInfo) return;
 
         const weather = weatherData.weather;
         const iconClass = this.getWeatherIcon(weather.weather[0].main);
-        
+
         const suitabilityClass = weatherData.hiking_suitable ? 'good' : 'poor';
         const suitabilityIcon = weatherData.hiking_suitable ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
-        
+
         const html = `
             <div class="date-weather-info weather-fade-in">
                 <div class="date-weather-summary">
@@ -357,9 +357,9 @@ class WeatherService {
 }
 
 // Initialize weather service when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     window.weatherService = new WeatherService();
-    
+
     // Initialize weather for booking page if refuge ID is available
     const bookingForm = document.getElementById('bookingForm');
     if (bookingForm) {
