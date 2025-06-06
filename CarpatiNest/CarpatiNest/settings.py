@@ -140,9 +140,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'bocanciiulian2000@gmail.com'  # Înlocuiește cu adresa ta de Gmail
-EMAIL_HOST_PASSWORD = 'rapx lwpr rnvo eggy'  # Înlocuiește cu parola de aplicație generată din contul Google
-DEFAULT_FROM_EMAIL = 'mataspartan23@gmail.com'  # Adresa de la care se vor trimite email-urile
+EMAIL_HOST_USER = 'a@a.com'  # Înlocuiește cu adresa ta de Gmail
+EMAIL_HOST_PASSWORD = 'asdwas'  # Înlocuiește cu parola de aplicație generată din contul Google
+DEFAULT_FROM_EMAIL = 'a@a.com'  # Adresa de la care se vor trimite email-urile
 
 # Pentru dezvoltare, poți folosi backend-ul de consolă:
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
